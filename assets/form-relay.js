@@ -1,13 +1,11 @@
 ( function () {
 	'use strict';
 	function responseFor( form ) {
-		var next = form.nextElementSibling;
-		if ( next && next.hasAttribute( 'data-form-relay-response' ) ) return next;
-		var linked = document.querySelector( '[data-form-relay-response="' + form.dataset.formRelay + '"]' );
-		if ( linked ) return linked;
+		var existing = form.querySelector( '[data-form-relay-response]' );
+		if ( existing ) return existing;
 		var response = document.createElement( 'div' );
 		response.className = 'form-relay-message'; response.setAttribute( 'aria-live', 'polite' ); response.setAttribute( 'data-form-relay-response', '' );
-		form.insertAdjacentElement( 'afterend', response ); return response;
+		form.insertAdjacentElement( 'beforeend', response ); return response;
 	}
 	function show( form, response, type, message, behaviour ) {
 		response.textContent = message || ''; response.classList.remove( 'form-relay-message--success', 'form-relay-message--error' ); response.classList.add( 'form-relay-message--' + type );
