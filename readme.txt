@@ -2,7 +2,7 @@
 Contributors: form-relay-contributors
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 1.6.2
+Stable tag: 1.6.3
 License: GPLv2 or later
 
 Handle same-site HTML form submissions through wp_mail().
@@ -20,7 +20,7 @@ The Main Email Template supports {{form_name}}, {{site_name}}, {{page_title}}, {
 
 The Form editor includes an Email Preview modal. It renders the current unsaved templates and subject with generic dummy data without sending an email.
 
-Outgoing messages use the configured Sender Name and a sender address derived from the WordPress site domain. A valid submitted email address is used as Reply-To, preferring the configured Reply-To Field and otherwise detecting the first valid email Submitted Field. The visitor's address is never used as From, which protects SPF and DMARC deliverability.
+Outgoing messages use the configured Sender Name, which supports {{site_name}} and {{form_name}}, and a sender address derived from the WordPress site domain. The default Sender Name is {{site_name}} Enquiries. A valid submitted email address is used as Reply-To, preferring the configured Reply-To Field and otherwise detecting the first valid email Submitted Field. The visitor's address is never used as From, which protects SPF and DMARC deliverability.
 
 == Developer hooks ==
 Filters: form_relay_submission_data, form_relay_email_subject, form_relay_email_html, form_relay_from_email, form_relay_error_code, form_relay_error_message, form_relay_duplicate_window, form_relay_max_fields, form_relay_max_field_name_length, form_relay_max_field_value_length, form_relay_max_payload_size.

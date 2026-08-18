@@ -47,7 +47,8 @@ class Form_Relay_Service {
 		if ( ! $send ) { return array( 'html' => $html, 'subject' => $subject ); }
 		$headers = array( 'Content-Type: text/html; charset=UTF-8' );
 		$from_email = $this->site_sender_email();
-		if ( $from_email ) { $headers[] = 'From: ' . sanitize_text_field( $settings['from_name'] ) . ' <' . $from_email . '>'; }
+		$from_name = str_replace( array( '{{site_name}}', '{{form_name}}' ), array( get_bloginfo( 'name' ), $settings['name'] ), $settings['from_name'] );
+		if ( $from_email ) { $headers[] = 'From: ' . sanitize_text_field( $from_name ) . ' <' . $from_email . '>'; }
 		$reply_key = $settings['reply_to_field'];
 		$reply_email = isset( $data['fields'][ $reply_key ] ) && is_email( $data['fields'][ $reply_key ] ) ? sanitize_email( $data['fields'][ $reply_key ] ) : $this->find_reply_email( $data['fields'] );
 		if ( $reply_email ) { $headers[] = 'Reply-To: ' . $reply_email; }

@@ -23,7 +23,7 @@ final class Form_Relay {
 	public static function new_form( $name = 'New Form' ) {
 		return array(
 			'id' => 'f_' . wp_generate_password( 8, false, false ), 'name' => $name, 'enabled' => 1,
-			'recipient' => 'recipient@example.com', 'from_name' => 'Example Website',
+			'recipient' => 'recipient@example.com', 'from_name' => '{{site_name}} Enquiries',
 			'subject' => 'New {{form_name}} submission from {{site_name}}', 'reply_to_field' => 'email',
 			'success_message' => 'Thanks, your message has been sent.', 'error_message' => 'Sorry, something went wrong. {{error_message}}', 'reset_after_success' => 1,
 			'response_type' => 'message', 'thank_you_page' => 0, 'success_classes' => '', 'error_classes' => '',
