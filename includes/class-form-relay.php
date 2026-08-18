@@ -23,7 +23,7 @@ final class Form_Relay {
 	public static function new_form( $name = 'New Form' ) {
 		return array(
 			'id' => 'f_' . wp_generate_password( 8, false, false ), 'name' => $name, 'enabled' => 1,
-			'recipient' => get_option( 'admin_email' ), 'from_name' => get_bloginfo( 'name' ),
+			'recipient' => 'recipient@example.com', 'from_name' => 'Example Website',
 			'subject' => 'New {{form_name}} submission from {{site_name}}', 'reply_to_field' => 'email',
 			'success_message' => 'Thanks, your message has been sent.', 'error_message' => 'Sorry, something went wrong. {{error_message}}', 'reset_after_success' => 1,
 			'response_type' => 'message', 'thank_you_page' => 0, 'success_classes' => '', 'error_classes' => '',
@@ -36,7 +36,7 @@ final class Form_Relay {
 	public static function settings() {
 		$settings = wp_parse_args( get_option( self::OPTION, array() ), self::defaults() );
 		if ( empty( $settings['forms'] ) ) {
-			$form = self::new_form( 'Contact Form' );
+			$form = self::new_form( 'Sample Form' );
 			foreach ( array_keys( $form ) as $key ) { if ( isset( $settings[ $key ] ) ) { $form[ $key ] = $settings[ $key ]; } }
 			$settings['forms'] = array( $form ); update_option( self::OPTION, $settings, false );
 		}
@@ -45,7 +45,7 @@ final class Form_Relay {
 		if ( $changed ) { update_option( self::OPTION, $settings, false ); }
 		return $settings;
 	}
-	public static function activate() { if ( ! get_option( self::OPTION ) ) { $settings = self::defaults(); $settings['forms'][] = self::new_form( 'Contact Form' ); add_option( self::OPTION, $settings, '', false ); } }
+	public static function activate() { if ( ! get_option( self::OPTION ) ) { $settings = self::defaults(); $settings['forms'][] = self::new_form( 'Sample Form' ); add_option( self::OPTION, $settings, '', false ); } }
 	public function run() {
 		$service = new Form_Relay_Service();
 		( new Form_Relay_REST( $service ) )->hooks();

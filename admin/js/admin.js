@@ -33,11 +33,11 @@ function openEmailPreview() {
 }
 
 function renderLocalEmailPreview( form, siteName ) {
-	var mainTemplate = form.querySelector( '[name="form[email_template]"]' ).value; var rowTemplate = form.querySelector( '[name="form[row_template]"]' ).value; var formName = form.querySelector( '[name="form[name]"]' ).value || 'Contact Form';
-	var fields = { name: 'Jane Smith', email: 'jane@example.com', phone: '07123 456789', company: 'Example Company', service: 'Web Development', message: "I'd like some information about a new website." };
+	var mainTemplate = form.querySelector( '[name="form[email_template]"]' ).value; var rowTemplate = form.querySelector( '[name="form[row_template]"]' ).value; var formName = form.querySelector( '[name="form[name]"]' ).value || 'Sample Form';
+	var fields = { name: 'Sample User', email: 'sample@example.com', phone: '07123 456789', company: 'Example Company', service: 'Web Development', message: "I'd like some information about a new website." };
 	var ignoredInput = form.querySelector( '[name="form[ignored_fields]"]' ); var ignored = ignoredInput ? ignoredInput.value.split( /\r?\n/ ).map( function ( item ) { return item.trim(); } ) : [];
 	var rows = Object.keys( fields ).filter( function ( key ) { return -1 === ignored.indexOf( key ); } ).map( function ( key ) { return replacePreviewPlaceholders( rowTemplate, { field_key: escapePreviewHtml( key ), field_label: escapePreviewHtml( previewLabel( key ) ), field_value: previewValue( fields[ key ] ) } ); } ).join( '' );
-	return replacePreviewPlaceholders( mainTemplate, { form_name: escapePreviewHtml( formName ), site_name: escapePreviewHtml( siteName || 'WordPress Website' ), page_title: 'Contact', page_url: 'https://example.com/contact/', submitted_at: new Date().toLocaleString(), fields: rows } );
+	return replacePreviewPlaceholders( mainTemplate, { form_name: escapePreviewHtml( formName ), site_name: escapePreviewHtml( siteName || 'Example Website' ), page_title: 'Sample Page', page_url: 'https://example.com/sample/', submitted_at: new Date().toLocaleString(), fields: rows } );
 }
 
 function replacePreviewPlaceholders( template, values ) { Object.keys( values ).forEach( function ( key ) { template = template.split( '{{' + key + '}}' ).join( values[ key ] ); } ); return template.replace( /{{[a-z_]+}}/g, '' ); }
