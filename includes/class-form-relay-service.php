@@ -46,7 +46,7 @@ class Form_Relay_Service {
 		$subject = $this->renderer->subject( $data, $settings );
 		if ( ! $send ) { return array( 'html' => $html, 'subject' => $subject ); }
 		$headers = array( 'Content-Type: text/html; charset=UTF-8' );
-		$from_email = $this->site_sender_email();
+		$from_email = $this->sender_email( $settings );
 		$from_name = str_replace( array( '{{site_name}}', '{{form_name}}' ), array( get_bloginfo( 'name' ), $settings['name'] ), $settings['from_name'] );
 		if ( $from_email ) { $headers[] = 'From: ' . sanitize_text_field( $from_name ) . ' <' . $from_email . '>'; }
 		$reply_key = $settings['reply_to_field'];
@@ -57,10 +57,12 @@ class Form_Relay_Service {
 		do_action( 'form_relay_after_send', $sent, $data );
 		return $sent;
 	}
-	private function site_sender_email() {
-		$host = strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) ); $host = preg_replace( '/^www\./', '', $host );
-		$email = sanitize_email( 'wordpress@' . $host ); if ( ! is_email( $email ) ) { $email = sanitize_email( get_option( 'admin_email' ) ); }
-		return sanitize_email( apply_filters( 'form_relay_from_email', $email, $host ) );
+	private function sender_email( $settings ) {
+		$domain = isset( $settings['sender_domain'] ) ? $settings['sender_domain'] : Form_Relay::site_domain();
+		$local = isset( $settings['sender_email'] ) ? $settings['sender_email'] : 'wordpress';
+		$email = sanitize_email( $local . '@' . $domain );
+		if ( ! is_email( $email ) ) { $email = sanitize_email( get_option( 'admin_email' ) ); }
+		return sanitize_email( apply_filters( 'form_relay_from_email', $email, $domain ) );
 	}
 	private function find_reply_email( $fields ) {
 		foreach ( $fields as $value ) { if ( is_string( $value ) && is_email( trim( $value ) ) ) { return sanitize_email( trim( $value ) ); } }

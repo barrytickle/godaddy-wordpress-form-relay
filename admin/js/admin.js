@@ -14,7 +14,12 @@ document.addEventListener( 'click', function ( event ) {
 
 document.addEventListener( 'keydown', function ( event ) { if ( 'Escape' === event.key ) closeEmailPreview(); } );
 document.addEventListener( 'change', function ( event ) { if ( event.target.matches( '[name="form[response_type]"]' ) ) updateResponsePanels(); } );
+document.addEventListener( 'input', function ( event ) { if ( event.target.matches( '[name="form[sender_domain]"]' ) ) updateSenderDomain( event.target.value ); } );
 document.addEventListener( 'DOMContentLoaded', updateResponsePanels );
+
+function updateSenderDomain( domain ) {
+	var suffix = document.querySelector( '.sender-email__domain' ); if ( suffix ) suffix.textContent = '@' + domain.replace( /^https?:\/\//i, '' ).replace( /^www\./i, '' ).split( '/' )[0];
+}
 
 function updateResponsePanels() {
 	var selected = document.querySelector( '[name="form[response_type]"]:checked' ); if ( ! selected ) return;
