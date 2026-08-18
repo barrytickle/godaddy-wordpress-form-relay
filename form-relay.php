@@ -4,6 +4,8 @@
  * Description: Securely relays external JSON form submissions to a configured email address.
  * Version: 1.8.0
  * Author: Form Relay Contributors
+ * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: form-relay
  */
 
