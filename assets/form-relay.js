@@ -1,0 +1,38 @@
+( function () {
+	'use strict';
+	function responseFor( form ) {
+		var next = form.nextElementSibling;
+		if ( next && next.hasAttribute( 'data-form-relay-response' ) ) return next;
+		var linked = document.querySelector( '[data-form-relay-response="' + form.dataset.formRelay + '"]' );
+		if ( linked ) return linked;
+		var response = document.createElement( 'div' );
+		response.className = 'form-relay-message'; response.setAttribute( 'aria-live', 'polite' ); response.setAttribute( 'data-form-relay-response', '' );
+		form.insertAdjacentElement( 'afterend', response ); return response;
+	}
+	function show( form, response, type, message, behaviour ) {
+		response.textContent = message || ''; response.classList.remove( 'form-relay-message--success', 'form-relay-message--error' ); response.classList.add( 'form-relay-message--' + type );
+		response.setAttribute( 'role', 'success' === type ? 'status' : 'alert' ); response.setAttribute( 'aria-live', 'success' === type ? 'polite' : 'assertive' );
+		form.classList.toggle( 'form-relay-submitted', 'success' === type ); form.classList.toggle( 'form-relay-has-error', 'error' === type );
+		var customClasses = 'success' === type ? behaviour.successClasses : behaviour.errorClasses; if ( Array.isArray( customClasses ) ) customClasses.forEach( function ( className ) { response.classList.add( className ); } );
+		if ( behaviour.scroll && response.scrollIntoView ) response.scrollIntoView( { behavior: 'smooth', block: 'nearest' } );
+	}
+	function init( form ) {
+		if ( form.dataset.formRelayReady ) return; form.dataset.formRelayReady = 'true';
+		var response = responseFor( form ); var behaviour = FormRelayConfig.forms[ form.dataset.formRelay ] || { disable: true, scroll: false };
+		form.addEventListener( 'submit', function ( event ) {
+			event.preventDefault(); if ( form.classList.contains( 'form-relay-loading' ) ) return;
+			var submitters = form.querySelectorAll( 'button[type="submit"],input[type="submit"]' ); response.textContent = ''; response.className = 'form-relay-message';
+			form.classList.remove( 'form-relay-submitted', 'form-relay-has-error' ); form.classList.add( 'form-relay-loading' );
+			if ( behaviour.disable ) submitters.forEach( function ( button ) { button.disabled = true; } );
+			var fields = {}; new FormData( form ).forEach( function ( value, key ) { if ( value instanceof File ) return; if ( Object.prototype.hasOwnProperty.call( fields, key ) ) { if ( ! Array.isArray( fields[ key ] ) ) fields[ key ] = [ fields[ key ] ]; fields[ key ].push( value ); } else fields[ key ] = value; } );
+			fetch( FormRelayConfig.endpoint, { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': FormRelayConfig.nonce }, body: JSON.stringify( { form_id: form.dataset.formRelay, fields: fields, meta: { site_name: FormRelayConfig.siteName, page_title: document.title, page_url: location.href } } ) } )
+				.then( function ( reply ) { return reply.json().catch( function () { return { success: false, error: { message: 'Something went wrong. Please try again.' } }; } ); } )
+				.then( function ( result ) { if ( result.success ) { if ( 'page' === behaviour.responseType && behaviour.thankYouUrl ) { window.location.assign( behaviour.thankYouUrl ); return; } show( form, response, 'success', result.message, behaviour ); if ( result.reset ) form.reset(); } else show( form, response, 'error', result.error && result.error.message ? result.error.message : 'Something went wrong. Please try again.', behaviour ); } )
+				.catch( function () { show( form, response, 'error', 'Something went wrong. Please try again.', behaviour ); } )
+				.finally( function () { form.classList.remove( 'form-relay-loading' ); if ( behaviour.disable ) submitters.forEach( function ( button ) { button.disabled = false; } ); } );
+		} );
+		if ( ! form.querySelector( '[name="_form_relay_hp"]' ) ) { var hp = document.createElement( 'input' ); hp.type = 'text'; hp.name = '_form_relay_hp'; hp.tabIndex = -1; hp.autocomplete = 'off'; hp.setAttribute( 'aria-hidden', 'true' ); hp.className = 'form-relay-honeypot'; form.appendChild( hp ); }
+	}
+	function boot() { document.querySelectorAll( 'form[data-form-relay]' ).forEach( init ); }
+	if ( 'loading' === document.readyState ) document.addEventListener( 'DOMContentLoaded', boot ); else boot();
+}() );
