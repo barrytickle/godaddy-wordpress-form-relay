@@ -54,21 +54,37 @@ class Form_Relay_Service {
 		$reply_email = isset( $data['fields'][ $reply_key ] ) && is_email( $data['fields'][ $reply_key ] ) ? sanitize_email( $data['fields'][ $reply_key ] ) : $this->find_reply_email( $data['fields'] );
 		if ( $reply_email ) { $headers[] = 'Reply-To: ' . $reply_email; }
 		do_action( 'form_relay_before_send', $data, $subject, $html, $headers );
-		$sent = $this->send_via_local_smtp( $settings['recipient'], $subject, $html, $headers, $settings );
+		$sent = $this->send( $settings['recipient'], $subject, $html, $headers, $settings );
 		do_action( 'form_relay_after_send', $sent, $data );
 		return $sent;
 	}
 	public function last_error() { return $this->last_error; }
-	private function send_via_local_smtp( $recipient, $subject, $html, $headers, $settings ) {
+	private function send( $recipient, $subject, $html, $headers, $form ) {
 		$this->last_error = '';
-		$host = sanitize_text_field( apply_filters( 'form_relay_smtp_host', '127.0.0.1', $settings ) );
-		$port = absint( apply_filters( 'form_relay_smtp_port', 25, $settings ) );
-		$configure = function( $mailer ) use ( $host, $port ) {
-			$mailer->isSMTP(); $mailer->Host = $host; $mailer->Port = $port; $mailer->SMTPAuth = false; $mailer->SMTPAutoTLS = false; $mailer->SMTPSecure = '';
-		};
+		$mail = Form_Relay::settings()['mail'];
+		$method = in_array( $mail['method'], array( 'wordpress', 'local', 'custom' ), true ) ? $mail['method'] : 'wordpress';
+		$configure = null;
+		if ( 'local' === $method ) {
+			$host = sanitize_text_field( apply_filters( 'form_relay_smtp_host', '127.0.0.1', $form, $mail ) );
+			$port = absint( apply_filters( 'form_relay_smtp_port', 25, $form, $mail ) );
+			$configure = function( $mailer ) use ( $host, $port ) {
+				$mailer->isSMTP(); $mailer->Host = $host; $mailer->Port = $port; $mailer->SMTPAuth = false; $mailer->SMTPAutoTLS = false; $mailer->SMTPSecure = '';
+			};
+		} elseif ( 'custom' === $method ) {
+			$host = sanitize_text_field( apply_filters( 'form_relay_smtp_host', $mail['host'], $form, $mail ) );
+			$port = absint( apply_filters( 'form_relay_smtp_port', $mail['port'], $form, $mail ) );
+			$encryption = in_array( $mail['encryption'], array( 'tls', 'ssl' ), true ) ? $mail['encryption'] : '';
+			$password = defined( 'FORM_RELAY_SMTP_PASSWORD' ) ? FORM_RELAY_SMTP_PASSWORD : $mail['password'];
+			$configure = function( $mailer ) use ( $host, $port, $encryption, $mail, $password ) {
+				$mailer->isSMTP(); $mailer->Host = $host; $mailer->Port = $port; $mailer->SMTPSecure = $encryption; $mailer->SMTPAutoTLS = ( 'tls' === $encryption );
+				$mailer->SMTPAuth = ! empty( $mail['authentication'] );
+				if ( $mailer->SMTPAuth ) { $mailer->Username = $mail['username']; $mailer->Password = $password; }
+			};
+		}
 		$failed = function( $error ) { $this->last_error = $error->get_error_message(); };
-		add_action( 'phpmailer_init', $configure, PHP_INT_MAX ); add_action( 'wp_mail_failed', $failed );
-		try { $sent = wp_mail( $recipient, $subject, $html, $headers ); } finally { remove_action( 'phpmailer_init', $configure, PHP_INT_MAX ); remove_action( 'wp_mail_failed', $failed ); }
+		if ( $configure ) { add_action( 'phpmailer_init', $configure, PHP_INT_MAX ); }
+		add_action( 'wp_mail_failed', $failed );
+		try { $sent = wp_mail( $recipient, $subject, $html, $headers ); } finally { if ( $configure ) { remove_action( 'phpmailer_init', $configure, PHP_INT_MAX ); } remove_action( 'wp_mail_failed', $failed ); }
 		if ( ! $sent && ! $this->last_error ) { $this->last_error = 'PHPMailer returned false without an error message.'; }
 		return $sent;
 	}

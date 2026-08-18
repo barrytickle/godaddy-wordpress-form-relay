@@ -2,6 +2,8 @@
 
 Form Relay connects an ordinary HTML form to WordPress and delivers each submission by email. It is intended for forms hosted on the same site and does not require an external form service or API key.
 
+Email can be delivered through the normal WordPress mail configuration, a GoDaddy/cPanel local SMTP preset, or a custom SMTP server. This allows Form Relay to work with an existing SMTP plugin as well as directly configured hosting mail.
+
 ## Basic setup
 
 1. Install and activate the plugin.
@@ -105,4 +107,3 @@ Forms can display an inline thank-you message or redirect to a selected WordPres
 Filters: `form_relay_submission_data`, `form_relay_email_subject`, `form_relay_email_html`, `form_relay_from_email`, `form_relay_smtp_host`, `form_relay_smtp_port`, `form_relay_error_code`, `form_relay_error_message`, `form_relay_duplicate_window`, `form_relay_max_fields`, `form_relay_max_field_name_length`, `form_relay_max_field_value_length`, `form_relay_max_payload_size`.
 
 Actions: `form_relay_before_send`, `form_relay_after_send`.
-

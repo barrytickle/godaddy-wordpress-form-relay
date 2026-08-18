@@ -17,7 +17,15 @@ final class Form_Relay {
 
 	public static function defaults() {
 		return array(
-			'logging' => 0, 'forms' => array(),
+			'logging' => 0,
+			'mail' => self::mail_defaults(),
+			'forms' => array(),
+		);
+	}
+	public static function mail_defaults() {
+		return array(
+			'method' => 'wordpress', 'host' => '', 'port' => 587, 'encryption' => 'tls',
+			'authentication' => 1, 'username' => '', 'password' => '',
 		);
 	}
 	public static function new_form( $name = 'New Form' ) {
@@ -35,14 +43,22 @@ final class Form_Relay {
 	}
 
 	public static function settings() {
-		$settings = wp_parse_args( get_option( self::OPTION, array() ), self::defaults() );
+		$stored = get_option( self::OPTION, array() );
+		$changed = false;
+		// Versions before 1.8 always used the local cPanel relay. Preserve that behaviour on upgrade.
+		if ( ! empty( $stored ) && ! isset( $stored['mail'] ) ) {
+			$stored['mail'] = wp_parse_args( array( 'method' => 'local' ), self::mail_defaults() );
+			$changed = true;
+		}
+		$settings = wp_parse_args( $stored, self::defaults() );
+		$settings['mail'] = wp_parse_args( $settings['mail'], self::mail_defaults() );
 		if ( empty( $settings['forms'] ) ) {
 			$form = self::new_form( 'Sample Form' );
 			foreach ( array_keys( $form ) as $key ) { if ( isset( $settings[ $key ] ) ) { $form[ $key ] = $settings[ $key ]; } }
 			$settings['forms'] = array( $form ); update_option( self::OPTION, $settings, false );
 		}
 		if ( isset( $settings['clients'] ) ) { unset( $settings['clients'] ); update_option( self::OPTION, $settings, false ); }
-		$changed = false; foreach ( $settings['forms'] as &$form ) { $form = wp_parse_args( $form, self::new_form( isset( $form['name'] ) ? $form['name'] : 'Form' ) ); if ( isset( $form['from_email'] ) ) { unset( $form['from_email'] ); $changed = true; } }
+		foreach ( $settings['forms'] as &$form ) { $form = wp_parse_args( $form, self::new_form( isset( $form['name'] ) ? $form['name'] : 'Form' ) ); if ( isset( $form['from_email'] ) ) { unset( $form['from_email'] ); $changed = true; } }
 		if ( $changed ) { update_option( self::OPTION, $settings, false ); }
 		return $settings;
 	}

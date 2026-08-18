@@ -13,9 +13,9 @@ document.addEventListener( 'click', function ( event ) {
 } );
 
 document.addEventListener( 'keydown', function ( event ) { if ( 'Escape' === event.key ) closeEmailPreview(); } );
-document.addEventListener( 'change', function ( event ) { if ( event.target.matches( '[name="form[response_type]"]' ) ) updateResponsePanels(); } );
+document.addEventListener( 'change', function ( event ) { if ( event.target.matches( '[name="form[response_type]"]' ) ) updateResponsePanels(); if ( event.target.matches( '[data-mail-method], [data-smtp-auth]' ) ) updateMailPanels(); } );
 document.addEventListener( 'input', function ( event ) { if ( event.target.matches( '[name="form[sender_domain]"]' ) ) updateSenderDomain( event.target.value ); } );
-document.addEventListener( 'DOMContentLoaded', updateResponsePanels );
+document.addEventListener( 'DOMContentLoaded', function () { updateResponsePanels(); updateMailPanels(); } );
 
 function updateSenderDomain( domain ) {
 	var suffix = document.querySelector( '.sender-email__domain' ); if ( suffix ) suffix.textContent = '@' + domain.replace( /^https?:\/\//i, '' ).replace( /^www\./i, '' ).split( '/' )[0];
@@ -24,6 +24,12 @@ function updateSenderDomain( domain ) {
 function updateResponsePanels() {
 	var selected = document.querySelector( '[name="form[response_type]"]:checked' ); if ( ! selected ) return;
 	document.querySelectorAll( '[data-response-panel]' ).forEach( function ( panel ) { panel.hidden = panel.dataset.responsePanel !== selected.value; } );
+}
+
+function updateMailPanels() {
+	var method = document.querySelector( '[data-mail-method]' ); if ( ! method ) return;
+	document.querySelectorAll( '[data-mail-panel]' ).forEach( function ( panel ) { panel.hidden = panel.dataset.mailPanel !== method.value; } );
+	var auth = document.querySelector( '[data-smtp-auth]' ); var authFields = document.querySelector( '.smtp-auth-fields' ); if ( auth && authFields ) authFields.hidden = ! auth.checked;
 }
 
 function openEmailPreview() {

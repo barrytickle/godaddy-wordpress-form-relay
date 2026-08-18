@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Form Relay
  * Description: Securely relays external JSON form submissions to a configured email address.
- * Version: 1.7.1
+ * Version: 1.8.0
  * Author: Form Relay Contributors
  * Text Domain: form-relay
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'FORM_RELAY_VERSION', '1.7.1' );
+define( 'FORM_RELAY_VERSION', '1.8.0' );
 define( 'FORM_RELAY_FILE', __FILE__ );
 define( 'FORM_RELAY_DIR', plugin_dir_path( __FILE__ ) );
 

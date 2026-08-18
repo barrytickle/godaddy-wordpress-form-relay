@@ -2,7 +2,7 @@
 Contributors: form-relay-contributors
 Requires at least: 6.0
 Requires PHP: 7.4
-Stable tag: 1.7.1
+Stable tag: 1.8.0
 License: GPLv2 or later
 
 Handle same-site HTML form submissions through wp_mail().
@@ -22,7 +22,7 @@ The Form editor includes an Email Preview modal. It renders the current unsaved 
 
 Outgoing messages use the configured Sender Name, Sender Email and Sender Domain. The Sender Email is the local part before the @, while Sender Domain defaults to the current WordPress site domain. The default Sender Name is {{site_name}} Enquiries and supports {{site_name}} and {{form_name}}. A valid submitted email address is used as Reply-To, preferring the configured Reply-To Field and otherwise detecting the first valid email Submitted Field. The visitor's address is never used as From, which protects SPF and DMARC deliverability.
 
-Form Relay uses WordPress's bundled PHPMailer over the hosting server's local SMTP service at 127.0.0.1:25, bypassing unreliable PHP mail wrappers while retaining WordPress mail hooks. The form_relay_smtp_host and form_relay_smtp_port filters can override the local relay address.
+Email delivery can use the WordPress default mail configuration, a GoDaddy/cPanel local SMTP preset at 127.0.0.1:25, or a custom SMTP server. New installations default to WordPress mail so existing SMTP plugins and hosting configuration continue to work. Installations upgrading from an earlier Form Relay release retain the local SMTP behaviour. Custom SMTP supports port, encryption and optional authentication; the password can be stored in WordPress or defined as FORM_RELAY_SMTP_PASSWORD in wp-config.php. The form_relay_smtp_host and form_relay_smtp_port filters can override the relay address.
 
 While a frontend submission is being sent, Form Relay inserts an accessible inline loading indicator as the final content inside the form. It is removed when the configured success or error response is ready.
 
