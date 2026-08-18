@@ -31,7 +31,7 @@ class Form_Relay_REST {
 		if ( get_transient( $fingerprint ) ) { return $this->failure( 'duplicate_submission', 409 ); }
 		$data = $this->service->normalise( $params ); if ( is_wp_error( $data ) ) { return $this->failure( 'validation_failed', 400 ); }
 		set_transient( $bucket, $count + 1, $window ); set_transient( $fingerprint, 1, (int) apply_filters( 'form_relay_duplicate_window', 30, $form_id ) );
-		$sent = $this->service->email( $data, true, $this->form ); $this->log( $sent, $sent ? '' : 'wp_mail() returned false while processing Form ID ' . $form_id . '.' );
+		$sent = $this->service->email( $data, true, $this->form ); $this->log( $sent, $sent ? '' : 'PHPMailer SMTP failed while processing Form ID ' . $form_id . ': ' . $this->service->last_error() );
 		if ( ! $sent ) { return $this->failure( 'mail_failed', 500 ); }
 		$message = $this->message( $this->form['success_message'], array( 'form_name' => $this->form['name'] ) );
 		return new WP_REST_Response( array( 'success' => true, 'message' => $message, 'reset' => ! empty( $this->form['reset_after_success'] ) ), 200 );

@@ -7,6 +7,7 @@ class Form_Relay_Service {
 	const MAX_VALUE = 10000;
 	const MAX_PAYLOAD = 102400;
 	private $renderer;
+	private $last_error = '';
 	public function __construct() { $this->renderer = new Form_Relay_Renderer(); }
 
 	public function normalise( $input ) {
@@ -53,8 +54,22 @@ class Form_Relay_Service {
 		$reply_email = isset( $data['fields'][ $reply_key ] ) && is_email( $data['fields'][ $reply_key ] ) ? sanitize_email( $data['fields'][ $reply_key ] ) : $this->find_reply_email( $data['fields'] );
 		if ( $reply_email ) { $headers[] = 'Reply-To: ' . $reply_email; }
 		do_action( 'form_relay_before_send', $data, $subject, $html, $headers );
-		$sent = wp_mail( $settings['recipient'], $subject, $html, $headers );
+		$sent = $this->send_via_local_smtp( $settings['recipient'], $subject, $html, $headers, $settings );
 		do_action( 'form_relay_after_send', $sent, $data );
+		return $sent;
+	}
+	public function last_error() { return $this->last_error; }
+	private function send_via_local_smtp( $recipient, $subject, $html, $headers, $settings ) {
+		$this->last_error = '';
+		$host = sanitize_text_field( apply_filters( 'form_relay_smtp_host', '127.0.0.1', $settings ) );
+		$port = absint( apply_filters( 'form_relay_smtp_port', 25, $settings ) );
+		$configure = function( $mailer ) use ( $host, $port ) {
+			$mailer->isSMTP(); $mailer->Host = $host; $mailer->Port = $port; $mailer->SMTPAuth = false; $mailer->SMTPAutoTLS = false; $mailer->SMTPSecure = '';
+		};
+		$failed = function( $error ) { $this->last_error = $error->get_error_message(); };
+		add_action( 'phpmailer_init', $configure, PHP_INT_MAX ); add_action( 'wp_mail_failed', $failed );
+		try { $sent = wp_mail( $recipient, $subject, $html, $headers ); } finally { remove_action( 'phpmailer_init', $configure, PHP_INT_MAX ); remove_action( 'wp_mail_failed', $failed ); }
+		if ( ! $sent && ! $this->last_error ) { $this->last_error = 'PHPMailer returned false without an error message.'; }
 		return $sent;
 	}
 	private function sender_email( $settings ) {
