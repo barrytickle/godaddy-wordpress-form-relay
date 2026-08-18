@@ -1,0 +1,137 @@
+# Form Relay: context for coding assistants
+
+This file records the important product and engineering decisions behind Form Relay. Read it before changing the plugin. It is context, not a substitute for inspecting the current code and diff.
+
+## Product purpose
+
+Form Relay is a lightweight WordPress plugin for developers who have already coded their own HTML form. It deliberately does not provide a drag-and-drop form builder or generate frontend form markup.
+
+A theme developer adds one immutable attribute to an existing same-site form:
+
+```html
+<form data-form-relay="FORM_ID">
+```
+
+The plugin intercepts the submission, validates and sanitises its fields, sends a templated HTML email, then either displays an inline response inside the form or redirects to a selected thank-you page.
+
+The intended public positioning is: **bring your own HTML; let WordPress handle secure submission and delivery**.
+
+## Repository and release conventions
+
+- The plugin display name is **Form Relay**.
+- The current version is declared in `form-relay.php` and must match `Stable tag` in `readme.txt`.
+- Development uses GitHub and `main`. WordPress.org releases will eventually require SVN tags as well.
+- Build installable archives with a single top-level plugin directory. The current public archive folder name is `developer-form-relay/`.
+- Do not commit credentials, private keys, real recipient addresses, production domains, SMTP passwords or incident logs.
+- Public defaults and documentation must use generic names, domains and email addresses.
+- Do not deploy to a live site or push changes unless the user explicitly asks.
+
+## Code map
+
+- `form-relay.php`: plugin header, version constants and bootstrap.
+- `includes/class-form-relay.php`: defaults, migrations, stored settings and frontend asset configuration.
+- `includes/class-form-relay-rest.php`: public REST submission endpoint, nonce/origin checks, rate limiting, honeypot and response handling.
+- `includes/class-form-relay-service.php`: submission normalisation, mail headers and transport selection.
+- `includes/class-form-relay-renderer.php`: placeholder expansion and safe HTML email rendering.
+- `admin/class-form-relay-admin.php`: Forms list, post-style editor, settings persistence, test email and preview markup.
+- `admin/js/admin.js`: admin interactions and client-side email preview.
+- `assets/form-relay.js`: frontend interception, payload creation, loader and success/error behaviour.
+- `readme.txt`: WordPress.org-format documentation.
+- `README.md`: human-facing GitHub documentation and mail troubleshooting.
+
+The codebase currently favours compact PHP. Preserve the existing style unless a broader formatting change is intentional and agreed.
+
+## Behaviour that must be preserved
+
+- Form IDs are immutable when a form is renamed.
+- The integration label is **Form Attribute**, not Form ID.
+- A disabled form remains configured but rejects frontend submissions.
+- Frontend success/error elements and the loading indicator are inserted using `beforeend` inside the form.
+- Successful submissions can either show a message or redirect to a WordPress page, never both.
+- Success and error elements support administrator-supplied CSS class names.
+- The email preview uses current unsaved templates, generic dummy contact data and the real WordPress site name. It must not send an email.
+- `{{fields}}` represents the concatenated rendered field rows, not a single submitted value.
+- Visitor email addresses are used only for Reply-To. Never use a visitor-controlled address as From.
+- Sender Name defaults to `{{site_name}} Enquiries`.
+- Sender Email is the local part and Sender Domain is the domain. Together they create the From address.
+- Public responses must never reveal PHPMailer, SMTP or other internal server errors.
+- Optional logs contain delivery metadata only, not submitted form contents.
+- The plugin must continue to work on WordPress multisite. Settings are stored per site through normal WordPress options.
+
+## Mail delivery architecture
+
+Version 1.8 introduced three global delivery methods:
+
+1. `wordpress`: normal `wp_mail()` behaviour. This is the default for fresh installations and respects hosting configuration and SMTP plugins.
+2. `local`: GoDaddy/cPanel-compatible local SMTP at `127.0.0.1:25`, without authentication or encryption.
+3. `custom`: administrator-provided SMTP host, port, encryption and optional authentication.
+
+Installations upgrading from a version before 1.8 must migrate to `local`, because local SMTP was previously hard-coded. Do not change that migration casually or existing sites may stop sending mail.
+
+Custom SMTP passwords may be saved in the WordPress option, but the preferred production configuration is the `FORM_RELAY_SMTP_PASSWORD` constant in `wp-config.php`. Password values must never be rendered back into the admin page or logs.
+
+PHPMailer hooks are attached only for the duration of Form Relay's individual `wp_mail()` call and must always be removed in a `finally` block. Form Relay must not globally alter unrelated WordPress email.
+
+## Security model
+
+The public endpoint is intentionally available to logged-out visitors. Its protection is layered:
+
+- WordPress REST nonce verification
+- same-origin scheme, host and port check
+- immutable configured form ID
+- enabled/disabled status
+- honeypot field
+- IP-based rate limiting
+- duplicate-submission fingerprints
+- maximum payload, field count, name length, value length and nesting depth
+- recursive sanitisation
+- context-appropriate escaping during email rendering
+
+Nonces are not authentication, particularly for logged-out users. Do not remove the other controls or describe the nonce as sufficient access control.
+
+All admin mutations require `manage_options` and `check_admin_referer( 'form_relay_admin' )`.
+
+Continue to follow WordPress's rules:
+
+- validate against explicit allow-lists where possible;
+- unslash request data before sanitising it;
+- sanitise before storage or use;
+- escape late according to the output context;
+- use `wp_kses()`/`wp_kses_post()` only where limited HTML is intended;
+- never expose internal mail errors to frontend visitors.
+
+## WordPress.org readiness
+
+The plugin has not yet completed a formal WordPress.org compliance pass. Before submission:
+
+- Run the official Plugin Check tool in a working WordPress environment.
+- Internationalise all user-facing strings with the `form-relay` text domain.
+- Complete and validate the WordPress.org `readme.txt`, including a real contributor username, tested version, FAQ and changelog.
+- Correct the plugin header description, which may still mention external JSON submissions.
+- Apply `form_relay_email_html` before the final `wp_kses()` call so filtered output is still constrained.
+- Apply the subject filter before final sanitisation to prevent extension code from introducing header characters.
+- Consider moving REST nonce/origin validation into a dedicated `permission_callback` rather than `__return_true`.
+- Make all expected admin request keys defensive against malformed requests.
+- Add an uninstall/data-retention policy.
+- Confirm the final WordPress.org name and slug before submission; the slug is difficult to change after approval.
+- Add directory artwork and screenshots only after functionality and naming are settled.
+
+Do not claim that the plugin is WordPress.org-approved or fully compliant until the official review has passed.
+
+## Validation before handing off changes
+
+At minimum, run:
+
+```sh
+for file in form-relay.php includes/*.php admin/*.php; do php -l "$file" || exit 1; done
+node --check admin/js/admin.js
+node --check assets/form-relay.js
+git diff --check
+```
+
+For mail changes, test each affected delivery method separately. A true return value from `wp_mail()` or PHPMailer means the configured server accepted the message; it does not guarantee final inbox delivery. Check the receiving inbox and the hosting provider's delivery logs when diagnosing deliverability.
+
+For frontend changes, verify successful submission, validation failure, server failure, duplicate detection, rate limiting, loader cleanup, button re-enabling, inline responses and thank-you redirects.
+
+For admin changes, verify saving, reload persistence, conditional panels, test email, preview rendering and multisite behaviour.
+
