@@ -2,6 +2,7 @@
 defined( 'ABSPATH' ) || exit;
 
 require_once FORM_RELAY_DIR . 'includes/class-form-relay-renderer.php';
+require_once FORM_RELAY_DIR . 'includes/class-form-relay-submissions.php';
 require_once FORM_RELAY_DIR . 'includes/class-form-relay-service.php';
 require_once FORM_RELAY_DIR . 'includes/class-form-relay-rest.php';
 require_once FORM_RELAY_DIR . 'admin/class-form-relay-admin.php';
@@ -62,16 +63,18 @@ final class Form_Relay {
 		if ( $changed ) { update_option( self::OPTION, $settings, false ); }
 		return $settings;
 	}
-	public static function activate() { if ( ! get_option( self::OPTION ) ) { $settings = self::defaults(); $settings['forms'][] = self::new_form( 'Sample Form' ); add_option( self::OPTION, $settings, '', false ); } }
+	public static function activate() { if ( ! get_option( self::OPTION ) ) { $settings = self::defaults(); $settings['forms'][] = self::new_form( 'Sample Form' ); add_option( self::OPTION, $settings, '', false ); } Form_Relay_Submissions::install(); }
 	public static function site_domain() {
 		$host = strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
 		return preg_replace( '/^www\./', '', $host );
 	}
 	public function run() {
+		Form_Relay_Submissions::maybe_install();
 		$service = new Form_Relay_Service();
-		( new Form_Relay_REST( $service ) )->hooks();
+		$submissions = new Form_Relay_Submissions();
+		( new Form_Relay_REST( $service, $submissions ) )->hooks();
 		add_action( 'wp_enqueue_scripts', array( $this, 'frontend_assets' ) );
-		if ( is_admin() ) { ( new Form_Relay_Admin( $service ) )->hooks(); }
+		if ( is_admin() ) { ( new Form_Relay_Admin( $service, $submissions ) )->hooks(); }
 	}
 	public function frontend_assets() {
 		wp_enqueue_script( 'form-relay', plugins_url( 'assets/form-relay.js', FORM_RELAY_FILE ), array(), FORM_RELAY_VERSION, true );

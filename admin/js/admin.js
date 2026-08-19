@@ -13,7 +13,7 @@ document.addEventListener( 'click', function ( event ) {
 } );
 
 document.addEventListener( 'keydown', function ( event ) { if ( 'Escape' === event.key ) closeEmailPreview(); } );
-document.addEventListener( 'change', function ( event ) { if ( event.target.matches( '[name="form[response_type]"]' ) ) updateResponsePanels(); if ( event.target.matches( '[data-mail-method], [data-smtp-auth]' ) ) updateMailPanels(); } );
+document.addEventListener( 'change', function ( event ) { if ( event.target.matches( '[name="form[response_type]"]' ) ) updateResponsePanels(); if ( event.target.matches( '[data-mail-method], [data-smtp-auth]' ) ) updateMailPanels(); if ( event.target.matches( '.form-relay-select-all' ) ) { document.querySelectorAll( '[name="submission_ids[]"], .form-relay-select-all' ).forEach( function ( checkbox ) { checkbox.checked = event.target.checked; } ); } } );
 document.addEventListener( 'input', function ( event ) { if ( event.target.matches( '[name="form[sender_domain]"]' ) ) updateSenderDomain( event.target.value ); } );
 document.addEventListener( 'DOMContentLoaded', function () { updateResponsePanels(); updateMailPanels(); } );
 

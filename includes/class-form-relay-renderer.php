@@ -26,7 +26,8 @@ class Form_Relay_Renderer {
 			'submitted_at' => esc_html( wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ) ) ), 'fields' => $rows,
 		);
 		$html = $this->replace( $settings['email_template'], $vars );
-		return apply_filters( 'form_relay_email_html', wp_kses( $html, $this->allowed_html() ), $data );
+		$html = apply_filters( 'form_relay_email_html', $html, $data );
+		return wp_kses( $html, $this->allowed_html() );
 	}
 
 	public function subject( $data, $settings ) {
@@ -35,7 +36,8 @@ class Form_Relay_Renderer {
 			'page_title' => $data['meta']['page_title'], 'page_url' => $data['meta']['page_url'],
 			'submitted_at' => wp_date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ) ),
 		) );
-		return apply_filters( 'form_relay_email_subject', sanitize_text_field( $subject ), $data );
+		$subject = apply_filters( 'form_relay_email_subject', $subject, $data );
+		return sanitize_text_field( $subject );
 	}
 
 	private function replace( $template, $vars ) {

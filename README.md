@@ -1,6 +1,8 @@
-# Form Relay
+# Developer Form Relay
 
 Form Relay connects an ordinary HTML form to WordPress and delivers each submission by email. It is intended for forms hosted on the same site and does not require an external form service or API key.
+
+Valid frontend submissions are also saved in **Form Relay > Submissions**. The WordPress-style list shows the Form, submitted name and email, delivery status, and submission time. Each record opens into a detail view, and administrators can filter or delete saved submissions. Successful and failed mail attempts are both retained so an email outage does not discard an enquiry.
 
 Email can be delivered through the normal WordPress mail configuration, a GoDaddy/cPanel local SMTP preset, or a custom SMTP server. This allows Form Relay to work with an existing SMTP plugin as well as directly configured hosting mail.
 
@@ -101,6 +103,10 @@ Email templates support placeholders including `{{form_name}}`, `{{site_name}}`,
 The form editor includes a preview button that renders the current template with dummy submission data without sending an email.
 
 Forms can display an inline thank-you message or redirect to a selected WordPress page. Error templates support `{{error_message}}`, `{{error_code}}` and `{{form_name}}`. Inline responses are inserted at the end of the form and can be given custom CSS classes.
+
+## Stored submission data
+
+Submissions are stored in a dedicated database table for the current WordPress site and are visible only to administrators with the `manage_options` capability. Records remain until they are deleted from **Form Relay > Submissions**. Because submitted fields may contain personal data, site owners should include them in their privacy and retention policy.
 
 ## Developer hooks
 

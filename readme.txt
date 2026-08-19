@@ -1,15 +1,37 @@
-=== Form Relay ===
-Contributors: form-relay-contributors
+=== Developer Form Relay ===
+Contributors: barrytickle
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.8.0
+Stable tag: 1.9.0
 License: GPLv2 or later
 
-Handle same-site HTML form submissions through wp_mail().
+Connect developer-built HTML forms to secure WordPress email delivery without replacing your markup.
+
+== Description ==
+
+Developer Form Relay is built for theme and site developers who already have their own form markup. Add one generated data attribute to an existing same-site HTML form, then configure its recipient, email templates, responses, delivery method, and abuse protection in WordPress.
+
+The plugin does not generate or replace form HTML. It enhances the form you have already built and inserts loading, success, and error feedback inside that form.
+
+Features include:
+
+* Multiple independently configured forms.
+* HTML email and field-row templates with documented placeholders.
+* Inline thank-you messages or redirects to a WordPress page.
+* Custom response classes for theme integration.
+* WordPress default mail, GoDaddy/cPanel local SMTP, and custom SMTP delivery.
+* Same-site and nonce checks, a honeypot, payload limits, rate limiting, and duplicate protection.
+* Email previews with dummy data and an optional metadata-only diagnostic log.
+* A WordPress-style Submissions screen that retains successful and failed delivery attempts.
 
 == Installation ==
-Activate Form Relay and open Form Relay in wp-admin. Use the familiar Forms list and Add New Form screen to create or edit a form, configure delivery, and copy its immutable Form ID.
+
+1. Upload the plugin folder to `/wp-content/plugins/`, or install its ZIP through Plugins > Add New > Upload Plugin.
+2. Activate Developer Form Relay.
+3. Open Form Relay in wp-admin and create or edit a form.
+4. Copy its Form Attribute into the opening tag of your existing HTML form.
+5. Configure the recipient, responses, templates, and email delivery method, then save.
 
 Add data-form-relay="FORM_ID" to an existing form on the same WordPress site. Form Relay's frontend script detects it, submits it using a WordPress nonce, and displays the configured success or safe public error message. No custom JavaScript, PHP, response element, API key, or external relay configuration is needed.
 
@@ -27,6 +49,43 @@ Email delivery can use the WordPress default mail configuration, a GoDaddy/cPane
 
 While a frontend submission is being sent, Form Relay inserts an accessible inline loading indicator as the final content inside the form. It is removed when the configured success or error response is ready.
 
+Each valid frontend submission is stored in the current site's dedicated Form Relay submissions table after email delivery is attempted. Open Form Relay > Submissions to filter by Form or delivery status, inspect submitted fields, and delete individual or multiple records. Failed deliveries are stored so an enquiry is not lost when email delivery is unavailable.
+
 == Developer hooks ==
 Filters: form_relay_submission_data, form_relay_email_subject, form_relay_email_html, form_relay_from_email, form_relay_smtp_host, form_relay_smtp_port, form_relay_error_code, form_relay_error_message, form_relay_duplicate_window, form_relay_max_fields, form_relay_max_field_name_length, form_relay_max_field_value_length, form_relay_max_payload_size.
 Actions: form_relay_before_send, form_relay_after_send.
+
+== Frequently Asked Questions ==
+
+= Does this plugin create the form markup? =
+
+No. It is designed for developers who have already built a form in a theme or template. The plugin connects that existing form to WordPress by means of a `data-form-relay` attribute.
+
+= Can I use my existing SMTP plugin? =
+
+Yes. Select WordPress Default as the delivery method and Developer Form Relay will use the normal WordPress mail configuration, including a compatible SMTP plugin.
+
+= Does it support multisite? =
+
+Yes. Settings are stored per site, so each site in a network can have its own forms and delivery configuration.
+
+= Does metadata logging store submitted message content? =
+
+No. The optional diagnostic log stores metadata such as time, form, outcome, and error code. It does not store submitted field values.
+
+= Are submitted fields stored in WordPress? =
+
+Yes. Valid frontend submissions are stored in a dedicated per-site database table and are visible only to administrators with the `manage_options` capability. They remain until an administrator deletes them from Form Relay > Submissions. Site owners should account for this personal data in their privacy and retention policy.
+
+== Changelog ==
+
+= 1.9.0 =
+
+* Added a Submissions submenu with a WordPress-style list, filtering, pagination, bulk deletion, and submission detail views.
+* Store both successful and failed email delivery attempts in a dedicated per-site database table.
+
+= 1.8.0 =
+
+* Added selectable WordPress, local cPanel, and custom SMTP delivery methods.
+* Added delivery diagnostics and WordPress.org submission metadata.
+* Improved sender configuration, form responses, email previewing, and frontend loading feedback.

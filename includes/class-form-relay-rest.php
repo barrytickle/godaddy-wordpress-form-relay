@@ -3,6 +3,7 @@ defined( 'ABSPATH' ) || exit;
 
 class Form_Relay_REST {
 	private $service;
+	private $submissions;
 	private $form;
 	private $errors = array(
 		'invalid_form' => 'This form is no longer available.', 'form_disabled' => 'This form is currently unavailable.',
@@ -11,7 +12,7 @@ class Form_Relay_REST {
 		'duplicate_submission' => 'This form appears to have already been submitted.', 'payload_too_large' => 'The submitted form contains too much information.',
 		'mail_failed' => "We couldn't send your message right now.", 'server_error' => 'Something went wrong. Please try again.',
 	);
-	public function __construct( $service ) { $this->service = $service; }
+	public function __construct( $service, $submissions ) { $this->service = $service; $this->submissions = $submissions; }
 	public function hooks() { add_action( 'rest_api_init', array( $this, 'routes' ) ); }
 	public function routes() { register_rest_route( 'form-relay/v1', '/send', array( 'methods' => WP_REST_Server::CREATABLE, 'callback' => array( $this, 'send' ), 'permission_callback' => '__return_true' ) ); }
 	public function send( $request ) {
@@ -31,7 +32,9 @@ class Form_Relay_REST {
 		if ( get_transient( $fingerprint ) ) { return $this->failure( 'duplicate_submission', 409 ); }
 		$data = $this->service->normalise( $params ); if ( is_wp_error( $data ) ) { return $this->failure( 'validation_failed', 400 ); }
 		set_transient( $bucket, $count + 1, $window ); set_transient( $fingerprint, 1, (int) apply_filters( 'form_relay_duplicate_window', 30, $form_id ) );
-		$sent = $this->service->email( $data, true, $this->form ); $this->log( $sent, $sent ? '' : 'PHPMailer SMTP failed while processing Form ID ' . $form_id . ': ' . $this->service->last_error() );
+		$sent = $this->service->email( $data, true, $this->form ); $error = $sent ? '' : $this->service->last_error();
+		$this->submissions->create( $data, $this->form, $sent, $error );
+		$this->log( $sent, $sent ? '' : 'PHPMailer SMTP failed while processing Form ID ' . $form_id . ': ' . $error );
 		if ( ! $sent ) { return $this->failure( 'mail_failed', 500 ); }
 		$message = $this->message( $this->form['success_message'], array( 'form_name' => $this->form['name'] ) );
 		return new WP_REST_Response( array( 'success' => true, 'message' => $message, 'reset' => ! empty( $this->form['reset_after_success'] ) ), 200 );

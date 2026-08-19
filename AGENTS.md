@@ -1,10 +1,10 @@
-# Form Relay: context for coding assistants
+# Developer Form Relay: context for coding assistants
 
-This file records the important product and engineering decisions behind Form Relay. Read it before changing the plugin. It is context, not a substitute for inspecting the current code and diff.
+This file records the important product and engineering decisions behind Developer Form Relay. Read it before changing the plugin. It is context, not a substitute for inspecting the current code and diff.
 
 ## Product purpose
 
-Form Relay is a lightweight WordPress plugin for developers who have already coded their own HTML form. It deliberately does not provide a drag-and-drop form builder or generate frontend form markup.
+Developer Form Relay is a lightweight WordPress plugin for developers who have already coded their own HTML form. It deliberately does not provide a drag-and-drop form builder or generate frontend form markup.
 
 A theme developer adds one immutable attribute to an existing same-site form:
 
@@ -18,8 +18,8 @@ The intended public positioning is: **bring your own HTML; let WordPress handle 
 
 ## Repository and release conventions
 
-- The plugin display name is **Form Relay**.
-- The current version is declared in `form-relay.php` and must match `Stable tag` in `readme.txt`.
+- The public plugin display name is **Developer Form Relay**. The shorter **Form Relay** label remains in wp-admin.
+- The current version is declared in `developer-form-relay.php` and must match `Stable tag` in `readme.txt`.
 - Development uses GitHub and `main`. WordPress.org releases will eventually require SVN tags as well.
 - Build installable archives with a single top-level plugin directory. The current public archive folder name is `developer-form-relay/`.
 - Do not commit credentials, private keys, real recipient addresses, production domains, SMTP passwords or incident logs.
@@ -28,11 +28,12 @@ The intended public positioning is: **bring your own HTML; let WordPress handle 
 
 ## Code map
 
-- `form-relay.php`: plugin header, version constants and bootstrap.
+- `developer-form-relay.php`: plugin header, version constants and bootstrap.
 - `includes/class-form-relay.php`: defaults, migrations, stored settings and frontend asset configuration.
 - `includes/class-form-relay-rest.php`: public REST submission endpoint, nonce/origin checks, rate limiting, honeypot and response handling.
 - `includes/class-form-relay-service.php`: submission normalisation, mail headers and transport selection.
 - `includes/class-form-relay-renderer.php`: placeholder expansion and safe HTML email rendering.
+- `includes/class-form-relay-submissions.php`: per-site submission table installation, persistence, queries and deletion.
 - `admin/class-form-relay-admin.php`: Forms list, post-style editor, settings persistence, test email and preview markup.
 - `admin/js/admin.js`: admin interactions and client-side email preview.
 - `assets/form-relay.js`: frontend interception, payload creation, loader and success/error behaviour.
@@ -56,6 +57,7 @@ The codebase currently favours compact PHP. Preserve the existing style unless a
 - Sender Email is the local part and Sender Domain is the domain. Together they create the From address.
 - Public responses must never reveal PHPMailer, SMTP or other internal server errors.
 - Optional logs contain delivery metadata only, not submitted form contents.
+- Valid frontend submissions are stored after email delivery is attempted, including failed delivery attempts, and are visible only to administrators.
 - The plugin must continue to work on WordPress multisite. Settings are stored per site through normal WordPress options.
 
 ## Mail delivery architecture
@@ -102,19 +104,16 @@ Continue to follow WordPress's rules:
 
 ## WordPress.org readiness
 
-The plugin has not yet completed a formal WordPress.org compliance pass. Before submission:
+The version 1.9 submission bundle completed the official Plugin Check plugin's General, Plugin Repo, Security, Performance and Accessibility categories with zero findings on 19 August 2026. The bundle deliberately excludes this file, `README.md` and other repository-only material.
 
-- Run the official Plugin Check tool in a working WordPress environment.
-- Internationalise all user-facing strings with the `form-relay` text domain.
-- Complete and validate the WordPress.org `readme.txt`, including a real contributor username, tested version, FAQ and changelog.
-- Correct the plugin header description, which may still mention external JSON submissions.
-- Apply `form_relay_email_html` before the final `wp_kses()` call so filtered output is still constrained.
-- Apply the subject filter before final sanitisation to prevent extension code from introducing header characters.
-- Consider moving REST nonce/origin validation into a dedicated `permission_callback` rather than `__return_true`.
-- Make all expected admin request keys defensive against malformed requests.
-- Add an uninstall/data-retention policy.
-- Confirm the final WordPress.org name and slug before submission; the slug is difficult to change after approval.
-- Add directory artwork and screenshots only after functionality and naming are settled.
+The submitted public name is **Developer Form Relay** and the expected slug/text domain is `developer-form-relay`. The plugin header, final escaping boundaries and WordPress.org `readme.txt` have been updated for submission.
+
+Future release work should still:
+
+- keep all new user-facing strings translation-ready with the `developer-form-relay` text domain;
+- preserve stored submissions on uninstall unless a future, clearly documented data-removal option is intentionally added;
+- consider moving REST nonce/origin validation into a dedicated `permission_callback` if the response contract can be preserved;
+- add directory artwork and screenshots after approval and final branding.
 
 Do not claim that the plugin is WordPress.org-approved or fully compliant until the official review has passed.
 
@@ -123,7 +122,7 @@ Do not claim that the plugin is WordPress.org-approved or fully compliant until 
 At minimum, run:
 
 ```sh
-for file in form-relay.php includes/*.php admin/*.php; do php -l "$file" || exit 1; done
+for file in developer-form-relay.php includes/*.php admin/*.php; do php -l "$file" || exit 1; done
 node --check admin/js/admin.js
 node --check assets/form-relay.js
 git diff --check
@@ -134,4 +133,3 @@ For mail changes, test each affected delivery method separately. A true return v
 For frontend changes, verify successful submission, validation failure, server failure, duplicate detection, rate limiting, loader cleanup, button re-enabling, inline responses and thank-you redirects.
 
 For admin changes, verify saving, reload persistence, conditional panels, test email, preview rendering and multisite behaviour.
-

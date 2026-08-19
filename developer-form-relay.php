@@ -1,17 +1,17 @@
 <?php
 /**
- * Plugin Name: Form Relay
- * Description: Securely relays external JSON form submissions to a configured email address.
- * Version: 1.8.0
+ * Plugin Name: Developer Form Relay
+ * Description: Adds secure email delivery to developer-built, same-site HTML forms without generating form markup.
+ * Version: 1.9.0
  * Author: Form Relay Contributors
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: form-relay
+ * Text Domain: developer-form-relay
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'FORM_RELAY_VERSION', '1.8.0' );
+define( 'FORM_RELAY_VERSION', '1.9.0' );
 define( 'FORM_RELAY_FILE', __FILE__ );
 define( 'FORM_RELAY_DIR', plugin_dir_path( __FILE__ ) );
 
