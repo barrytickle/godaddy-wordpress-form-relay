@@ -77,6 +77,12 @@ No. The optional diagnostic log stores metadata such as time, form, outcome, and
 
 Yes. Valid frontend submissions are stored in a dedicated per-site database table and are visible only to administrators with the `manage_options` capability. They remain until an administrator deletes them from Form Relay > Submissions. Site owners should account for this personal data in their privacy and retention policy.
 
+== Screenshots ==
+
+1. The Forms list in wp-admin, showing all configured forms.
+2. Editing a form's email templates and delivery settings.
+3. A form's configuration fields for recipient and behaviour.
+
 == Changelog ==
 
 = 1.9.1 =
