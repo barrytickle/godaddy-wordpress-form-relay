@@ -19,16 +19,16 @@ The intended public positioning is: **bring your own HTML; let WordPress handle 
 ## Repository and release conventions
 
 - The public plugin display name is **Tango Form Wire** (slug and text domain `tango-form-wire`). The shorter **Form Relay** label remains in wp-admin, and internal hooks, classes, constants and the database table keep the `form_relay`/`Form_Relay` prefix by design — see "WordPress.org readiness" below for why only the public name/slug/text domain changed.
-- The current version is declared in `developer-form-relay.php` and must match `Stable tag` in `readme.txt`.
+- The current version is declared in `tango-form-wire.php` and must match `Stable tag` in `readme.txt`.
 - Development uses GitHub and `main`. WordPress.org releases will eventually require SVN tags as well.
-- Build installable archives with a single top-level plugin directory. Until WordPress.org grants the new slug, keep the archive folder (and the main file) named `developer-form-relay/`/`developer-form-relay.php` — a folder renamed to `tango-form-wire/` caused their upload processor to report "no Plugin Name" even though the in-file header parses fine. Switch the archive folder name to `tango-form-wire/` once the slug reservation is confirmed.
+- Build installable archives with a single top-level plugin directory named `tango-form-wire/`, main file `tango-form-wire.php` (the slug is now granted on WordPress.org). While the slug was still pending, the archive briefly had to stay on the old `developer-form-relay/`/`developer-form-relay.php` naming — renaming it early caused their upload processor to report "no Plugin Name" even though the in-file header parsed fine.
 - Do not commit credentials, private keys, real recipient addresses, production domains, SMTP passwords or incident logs.
 - Public defaults and documentation must use generic names, domains and email addresses.
 - Do not deploy to a live site or push changes unless the user explicitly asks.
 
 ## Code map
 
-- `developer-form-relay.php`: plugin header, version constants and bootstrap.
+- `tango-form-wire.php`: plugin header, version constants and bootstrap.
 - `includes/class-form-relay.php`: defaults, migrations, stored settings and frontend asset configuration.
 - `includes/class-form-relay-rest.php`: public REST submission endpoint, nonce/origin checks, rate limiting, honeypot and response handling.
 - `includes/class-form-relay-service.php`: submission normalisation, mail headers and transport selection.
@@ -124,7 +124,7 @@ Do not claim that the plugin is WordPress.org-approved or fully compliant until 
 At minimum, run:
 
 ```sh
-for file in developer-form-relay.php includes/*.php admin/*.php; do php -l "$file" || exit 1; done
+for file in tango-form-wire.php includes/*.php admin/*.php; do php -l "$file" || exit 1; done
 node --check admin/js/admin.js
 node --check assets/form-relay.js
 git diff --check
