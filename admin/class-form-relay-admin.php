@@ -6,7 +6,7 @@ class Form_Relay_Admin {
 	private $submissions;
 	public function __construct( $service, $submissions ) { $this->service = $service; $this->submissions = $submissions; }
 	public function hooks() { add_action( 'admin_menu', array( $this, 'menu' ) ); add_action( 'admin_init', array( $this, 'actions' ) ); add_action( 'admin_enqueue_scripts', array( $this, 'assets' ) ); }
-	public function menu() { add_menu_page( 'Developer Form Relay', 'Form Relay', 'manage_options', 'form-relay', array( $this, 'page' ), 'dashicons-email-alt' ); add_submenu_page( 'form-relay', 'Forms', 'Forms', 'manage_options', 'form-relay', array( $this, 'page' ) ); add_submenu_page( 'form-relay', 'Submissions', 'Submissions', 'manage_options', 'form-relay-submissions', array( $this, 'submissions_page' ) ); }
+	public function menu() { add_menu_page( 'Tango Form Wire', 'Form Relay', 'manage_options', 'form-relay', array( $this, 'page' ), 'dashicons-email-alt' ); add_submenu_page( 'form-relay', 'Forms', 'Forms', 'manage_options', 'form-relay', array( $this, 'page' ) ); add_submenu_page( 'form-relay', 'Submissions', 'Submissions', 'manage_options', 'form-relay-submissions', array( $this, 'submissions_page' ) ); }
 	public function assets( $hook ) {
 		if ( ! in_array( $hook, array( 'toplevel_page_form-relay', 'form-relay_page_form-relay-submissions' ), true ) ) { return; }
 		wp_enqueue_style( 'form-relay-admin', plugins_url( 'css/admin.css', __FILE__ ), array(), FORM_RELAY_VERSION );

@@ -1,4 +1,4 @@
-# Developer Form Relay
+# Tango Form Wire
 
 Form Relay connects an ordinary HTML form to WordPress and delivers each submission by email. It is intended for forms hosted on the same site and does not require an external form service or API key.
 

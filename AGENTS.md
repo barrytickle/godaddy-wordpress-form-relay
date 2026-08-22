@@ -1,10 +1,10 @@
-# Developer Form Relay: context for coding assistants
+# Tango Form Wire: context for coding assistants
 
-This file records the important product and engineering decisions behind Developer Form Relay. Read it before changing the plugin. It is context, not a substitute for inspecting the current code and diff.
+This file records the important product and engineering decisions behind Tango Form Wire (formerly published as "Developer Form Relay"). Read it before changing the plugin. It is context, not a substitute for inspecting the current code and diff.
 
 ## Product purpose
 
-Developer Form Relay is a lightweight WordPress plugin for developers who have already coded their own HTML form. It deliberately does not provide a drag-and-drop form builder or generate frontend form markup.
+Tango Form Wire is a lightweight WordPress plugin for developers who have already coded their own HTML form. It deliberately does not provide a drag-and-drop form builder or generate frontend form markup.
 
 A theme developer adds one immutable attribute to an existing same-site form:
 
@@ -18,10 +18,10 @@ The intended public positioning is: **bring your own HTML; let WordPress handle 
 
 ## Repository and release conventions
 
-- The public plugin display name is **Developer Form Relay**. The shorter **Form Relay** label remains in wp-admin.
+- The public plugin display name is **Tango Form Wire** (slug and text domain `tango-form-wire`). The shorter **Form Relay** label remains in wp-admin, and internal hooks, classes, constants and the database table keep the `form_relay`/`Form_Relay` prefix by design — see "WordPress.org readiness" below for why only the public name/slug/text domain changed.
 - The current version is declared in `developer-form-relay.php` and must match `Stable tag` in `readme.txt`.
 - Development uses GitHub and `main`. WordPress.org releases will eventually require SVN tags as well.
-- Build installable archives with a single top-level plugin directory. The current public archive folder name is `developer-form-relay/`.
+- Build installable archives with a single top-level plugin directory. The public archive folder name is now `tango-form-wire/`.
 - Do not commit credentials, private keys, real recipient addresses, production domains, SMTP passwords or incident logs.
 - Public defaults and documentation must use generic names, domains and email addresses.
 - Do not deploy to a live site or push changes unless the user explicitly asks.
@@ -106,11 +106,13 @@ Continue to follow WordPress's rules:
 
 The version 1.9 submission bundle completed the official Plugin Check plugin's General, Plugin Repo, Security, Performance and Accessibility categories with zero findings on 19 August 2026. The bundle deliberately excludes this file, `README.md` and other repository-only material.
 
-The submitted public name is **Developer Form Relay** and the expected slug/text domain is `developer-form-relay`. The plugin header, final escaping boundaries and WordPress.org `readme.txt` have been updated for submission.
+On 22 August 2026 the WordPress.org Plugins Team pended that submission over two issues: the display name/slug ("Form Relay" was flagged as too close to existing third-party form-relay services, e.g. formrelay.com and formrelay.app) and a contributors/ownership mismatch (readme listed `barrytickle` as sole contributor while the submitting account is `tangodevelopment`, both owned by the same person). In response, the plugin was renamed to **Tango Form Wire** (slug/text domain `tango-form-wire`), and `tangodevelopment` was added to the readme `Contributors` list alongside `barrytickle`. This was a deliberately minimal rename: internal hook names, class names, constants and the database table keep the `form_relay` prefix; only the public plugin name, slug, text domain, and the `add_menu_page()` page title (not the wp-admin menu label) changed.
+
+The current public name is **Tango Form Wire** and the expected slug/text domain is `tango-form-wire`. The plugin header, final escaping boundaries and WordPress.org `readme.txt` have been updated for resubmission.
 
 Future release work should still:
 
-- keep all new user-facing strings translation-ready with the `developer-form-relay` text domain;
+- keep all new user-facing strings translation-ready with the `tango-form-wire` text domain;
 - preserve stored submissions on uninstall unless a future, clearly documented data-removal option is intentionally added;
 - consider moving REST nonce/origin validation into a dedicated `permission_callback` if the response contract can be preserved;
 - add directory artwork and screenshots after approval and final branding.

@@ -1,16 +1,16 @@
-=== Developer Form Relay ===
-Contributors: barrytickle
+=== Tango Form Wire ===
+Contributors: barrytickle, tangodevelopment
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.9.0
+Stable tag: 1.9.1
 License: GPLv2 or later
 
 Connect developer-built HTML forms to secure WordPress email delivery without replacing your markup.
 
 == Description ==
 
-Developer Form Relay is built for theme and site developers who already have their own form markup. Add one generated data attribute to an existing same-site HTML form, then configure its recipient, email templates, responses, delivery method, and abuse protection in WordPress.
+Tango Form Wire is built for theme and site developers who already have their own form markup. Add one generated data attribute to an existing same-site HTML form, then configure its recipient, email templates, responses, delivery method, and abuse protection in WordPress.
 
 The plugin does not generate or replace form HTML. It enhances the form you have already built and inserts loading, success, and error feedback inside that form.
 
@@ -28,7 +28,7 @@ Features include:
 == Installation ==
 
 1. Upload the plugin folder to `/wp-content/plugins/`, or install its ZIP through Plugins > Add New > Upload Plugin.
-2. Activate Developer Form Relay.
+2. Activate Tango Form Wire.
 3. Open Form Relay in wp-admin and create or edit a form.
 4. Copy its Form Attribute into the opening tag of your existing HTML form.
 5. Configure the recipient, responses, templates, and email delivery method, then save.
@@ -63,7 +63,7 @@ No. It is designed for developers who have already built a form in a theme or te
 
 = Can I use my existing SMTP plugin? =
 
-Yes. Select WordPress Default as the delivery method and Developer Form Relay will use the normal WordPress mail configuration, including a compatible SMTP plugin.
+Yes. Select WordPress Default as the delivery method and Tango Form Wire will use the normal WordPress mail configuration, including a compatible SMTP plugin.
 
 = Does it support multisite? =
 
@@ -78,6 +78,10 @@ No. The optional diagnostic log stores metadata such as time, form, outcome, and
 Yes. Valid frontend submissions are stored in a dedicated per-site database table and are visible only to administrators with the `manage_options` capability. They remain until an administrator deletes them from Form Relay > Submissions. Site owners should account for this personal data in their privacy and retention policy.
 
 == Changelog ==
+
+= 1.9.1 =
+
+* Renamed the plugin to Tango Form Wire and updated the readme contributors list.
 
 = 1.9.0 =
 
