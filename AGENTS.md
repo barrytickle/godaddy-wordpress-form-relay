@@ -21,7 +21,7 @@ The intended public positioning is: **bring your own HTML; let WordPress handle 
 - The public plugin display name is **Tango Form Wire** (slug and text domain `tango-form-wire`). The shorter **Form Relay** label remains in wp-admin, and internal hooks, classes, constants and the database table keep the `form_relay`/`Form_Relay` prefix by design — see "WordPress.org readiness" below for why only the public name/slug/text domain changed.
 - The current version is declared in `tango-form-wire.php` and must match `Stable tag` in `readme.txt`.
 - Development uses GitHub and `main`. WordPress.org's plugin directory is a separate SVN repo (`https://plugins.svn.wordpress.org/tango-form-wire/`) — GitHub commits do not automatically publish there.
-- `bin/release-to-svn.sh` automates syncing the git repo's shipped files into an SVN working copy at `.svn-wc/` (gitignored), cutting a `tags/<version>` snapshot, and committing. It refuses to re-tag a version that's already published, and refuses to run if the plugin header version and readme `Stable tag` don't match. Run `--no-commit` to stage without publishing. It does not touch `assets/` (icon, banner, screenshots) — those live only in the SVN working copy and are managed by hand, since they aren't tracked in git. The script must be run interactively by the user in their own terminal, never by an assistant on their behalf, since `svn commit` needs their WordPress.org password (cached afterwards via macOS Keychain, since this environment's `svn` build links `Security.framework`).
+- `bin/release-to-svn.sh` automates syncing the git repo's shipped files into an SVN working copy at `.svn-wc/` (gitignored), cutting a `tags/<version>` snapshot, and committing. It refuses to re-tag a version that's already published, and refuses to run if the plugin header version and readme `Stable tag` don't match. Run `--no-commit` to stage without publishing. It does not touch `assets/` (icon, banner, screenshots) — those live only in the SVN working copy and are managed by hand, since they aren't tracked in git. The script must be run interactively by the user in their own terminal, never by an assistant on their behalf, since `svn commit` needs their WordPress.org password (cached afterwards via macOS Keychain, since this environment's `svn` build links `Security.framework`). See `RELEASING.md` for the plain-language walkthrough.
 - Build installable archives with a single top-level plugin directory named `tango-form-wire/`, main file `tango-form-wire.php` (the slug is now granted on WordPress.org). While the slug was still pending, the archive briefly had to stay on the old `developer-form-relay/`/`developer-form-relay.php` naming — renaming it early caused their upload processor to report "no Plugin Name" even though the in-file header parsed fine.
 - Do not commit credentials, private keys, real recipient addresses, production domains, SMTP passwords or incident logs.
 - Public defaults and documentation must use generic names, domains and email addresses.
@@ -40,6 +40,7 @@ The intended public positioning is: **bring your own HTML; let WordPress handle 
 - `assets/form-relay.js`: frontend interception, payload creation, loader and success/error behaviour.
 - `readme.txt`: WordPress.org-format documentation.
 - `README.md`: human-facing GitHub documentation and mail troubleshooting.
+- `RELEASING.md`: human-facing walkthrough for publishing a release via `bin/release-to-svn.sh`.
 
 The codebase currently favours compact PHP. Preserve the existing style unless a broader formatting change is intentional and agreed.
 
@@ -105,7 +106,7 @@ Continue to follow WordPress's rules:
 
 ## WordPress.org readiness
 
-The version 1.9 submission bundle completed the official Plugin Check plugin's General, Plugin Repo, Security, Performance and Accessibility categories with zero findings on 19 August 2026. The bundle deliberately excludes this file, `README.md` and other repository-only material.
+The version 1.9 submission bundle completed the official Plugin Check plugin's General, Plugin Repo, Security, Performance and Accessibility categories with zero findings on 19 August 2026. The bundle deliberately excludes this file, `README.md`, `RELEASING.md` and other repository-only material.
 
 On 22 August 2026 the WordPress.org Plugins Team pended that submission over two issues: the display name/slug ("Form Relay" was flagged as too close to existing third-party form-relay services, e.g. formrelay.com and formrelay.app) and a contributors/ownership mismatch (readme listed `barrytickle` as sole contributor while the submitting account is `tangodevelopment`, both owned by the same person). In response, the plugin was renamed to **Tango Form Wire** (slug/text domain `tango-form-wire`), and `tangodevelopment` was added to the readme `Contributors` list alongside `barrytickle`. This was a deliberately minimal rename: internal hook names, class names, constants and the database table keep the `form_relay` prefix; only the public plugin name, slug, text domain, and the `add_menu_page()` page title (not the wp-admin menu label) changed.
 
