@@ -57,7 +57,7 @@ STAGE="$(mktemp -d)"
 trap 'rm -rf "$STAGE"' EXIT
 
 cd "$REPO_ROOT"
-git ls-files | grep -v -E '^(AGENTS\.md|README\.md|NOTES\.md|RELEASING\.md)$' | while IFS= read -r f; do
+git ls-files | grep -v -E '^(AGENTS\.md|README\.md|NOTES\.md|RELEASING\.md|human\.txt)$' | while IFS= read -r f; do
     mkdir -p "$STAGE/$(dirname "$f")"
     cp "$REPO_ROOT/$f" "$STAGE/$f"
 done

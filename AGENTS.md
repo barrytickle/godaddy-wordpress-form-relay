@@ -41,6 +41,7 @@ The intended public positioning is: **bring your own HTML; let WordPress handle 
 - `readme.txt`: WordPress.org-format documentation.
 - `README.md`: human-facing GitHub documentation and mail troubleshooting.
 - `RELEASING.md`: human-facing walkthrough for publishing a release via `bin/release-to-svn.sh`.
+- `human.txt`: the same release steps as a bare-bones cheat sheet.
 
 The codebase currently favours compact PHP. Preserve the existing style unless a broader formatting change is intentional and agreed.
 
@@ -106,7 +107,7 @@ Continue to follow WordPress's rules:
 
 ## WordPress.org readiness
 
-The version 1.9 submission bundle completed the official Plugin Check plugin's General, Plugin Repo, Security, Performance and Accessibility categories with zero findings on 19 August 2026. The bundle deliberately excludes this file, `README.md`, `RELEASING.md` and other repository-only material.
+The version 1.9 submission bundle completed the official Plugin Check plugin's General, Plugin Repo, Security, Performance and Accessibility categories with zero findings on 19 August 2026. The bundle deliberately excludes this file, `README.md`, `RELEASING.md`, `human.txt` and other repository-only material.
 
 On 22 August 2026 the WordPress.org Plugins Team pended that submission over two issues: the display name/slug ("Form Relay" was flagged as too close to existing third-party form-relay services, e.g. formrelay.com and formrelay.app) and a contributors/ownership mismatch (readme listed `barrytickle` as sole contributor while the submitting account is `tangodevelopment`, both owned by the same person). In response, the plugin was renamed to **Tango Form Wire** (slug/text domain `tango-form-wire`), and `tangodevelopment` was added to the readme `Contributors` list alongside `barrytickle`. This was a deliberately minimal rename: internal hook names, class names, constants and the database table keep the `form_relay` prefix; only the public plugin name, slug, text domain, and the `add_menu_page()` page title (not the wp-admin menu label) changed.
 

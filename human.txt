@@ -1,0 +1,43 @@
+HOW TO RELEASE A NEW VERSION
+=============================
+
+1. Make your change, commit and push it as normal:
+
+   git add .
+   git commit -m "..."
+   git push origin main
+
+2. Bump the version number in BOTH places (they must match):
+
+   - tango-form-wire.php  ->  Version: line + FORM_RELAY_VERSION constant
+   - readme.txt           ->  Stable tag: line
+
+   Add a line under "== Changelog ==" in readme.txt too.
+
+3. Commit and push the version bump:
+
+   git add tango-form-wire.php readme.txt
+   git commit -m "Bump to X.Y.Z"
+   git push origin main
+
+4. Publish it to WordPress.org:
+
+   bin/release-to-svn.sh
+
+   Type "y" when it asks to confirm. Enter your SVN password if it
+   asks (usually only the first time - Keychain remembers it after).
+
+Done. Check wordpress.org/plugins/tango-form-wire after a minute or two.
+
+---
+
+Updating the plugin icon, banner or screenshots? That part is manual,
+not covered by the script:
+
+   1. Copy the new file into .svn-wc/assets/
+   2. cd .svn-wc
+   3. svn commit -m "update assets" --username tangodevelopment
+
+---
+
+Full details, including what can go wrong: see RELEASING.md
