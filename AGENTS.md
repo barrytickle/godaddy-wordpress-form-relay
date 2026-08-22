@@ -21,7 +21,7 @@ The intended public positioning is: **bring your own HTML; let WordPress handle 
 - The public plugin display name is **Tango Form Wire** (slug and text domain `tango-form-wire`). The shorter **Form Relay** label remains in wp-admin, and internal hooks, classes, constants and the database table keep the `form_relay`/`Form_Relay` prefix by design — see "WordPress.org readiness" below for why only the public name/slug/text domain changed.
 - The current version is declared in `developer-form-relay.php` and must match `Stable tag` in `readme.txt`.
 - Development uses GitHub and `main`. WordPress.org releases will eventually require SVN tags as well.
-- Build installable archives with a single top-level plugin directory. The public archive folder name is now `tango-form-wire/`.
+- Build installable archives with a single top-level plugin directory. Until WordPress.org grants the new slug, keep the archive folder (and the main file) named `developer-form-relay/`/`developer-form-relay.php` — a folder renamed to `tango-form-wire/` caused their upload processor to report "no Plugin Name" even though the in-file header parses fine. Switch the archive folder name to `tango-form-wire/` once the slug reservation is confirmed.
 - Do not commit credentials, private keys, real recipient addresses, production domains, SMTP passwords or incident logs.
 - Public defaults and documentation must use generic names, domains and email addresses.
 - Do not deploy to a live site or push changes unless the user explicitly asks.
