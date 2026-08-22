@@ -6,24 +6,29 @@ Requires PHP: 7.4
 Stable tag: 1.9.1
 License: GPLv2 or later
 
-Connect developer-built HTML forms to secure WordPress email delivery without replacing your markup.
+Connect your existing HTML forms to WordPress email delivery, saved submissions and SMTP without replacing your markup.
 
 == Description ==
 
-Tango Form Wire is built for theme and site developers who already have their own form markup. Add one generated data attribute to an existing same-site HTML form, then configure its recipient, email templates, responses, delivery method, and abuse protection in WordPress.
+Tango Form Wire is built for developers who prefer to own their form markup without rebuilding the submission pipeline every time.
 
-The plugin does not generate or replace form HTML. It enhances the form you have already built and inserts loading, success, and error feedback inside that form.
+Add one `data-form-relay` attribute to an existing same-site HTML form and Tango Form Wire handles the handoff to WordPress. You keep full control of your HTML, CSS and frontend experience while the plugin handles submission processing, email delivery, success and error responses, and stored submissions.
 
-Features include:
+There is no form builder, embedded third-party widget or external form API to configure.
 
-* Multiple independently configured forms.
-* HTML email and field-row templates with documented placeholders.
-* Inline thank-you messages or redirects to a WordPress page.
-* Custom response classes for theme integration.
-* WordPress default mail, GoDaddy/cPanel local SMTP, and custom SMTP delivery.
-* Same-site and nonce checks, a honeypot, payload limits, rate limiting, and duplicate protection.
-* Email previews with dummy data and an optional metadata-only diagnostic log.
-* A WordPress-style Submissions screen that retains successful and failed delivery attempts.
+**What Tango Form Wire handles**
+
+* Connect existing HTML forms with one generated data attribute.
+* Create multiple independently configured forms.
+* Deliver through WordPress mail, local cPanel SMTP or a custom SMTP server.
+* Store valid submissions in WordPress, including failed delivery attempts.
+* Build and preview HTML email templates using submission placeholders.
+* Show inline loading, success and error responses, or redirect to a WordPress thank-you page.
+* Configure sensible sender and Reply-To behaviour.
+* Protect submissions with same-site checks, WordPress nonces, a honeypot, payload limits, rate limiting and duplicate protection.
+* Extend behaviour through developer filters and actions.
+
+You build the form. Tango Form Wire handles the handoff.
 
 == Installation ==
 
