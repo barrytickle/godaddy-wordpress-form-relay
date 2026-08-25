@@ -3,7 +3,7 @@ Contributors: barrytickle, tangodevelopment
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.9.1
+Stable tag: 1.10.0
 License: GPLv2 or later
 
 Connect your existing HTML forms to WordPress email delivery, saved submissions and SMTP without replacing your markup.
@@ -14,7 +14,7 @@ Tango Form Wire is built for developers who prefer to own their form markup with
 
 Add one `data-form-relay` attribute to an existing same-site HTML form and Tango Form Wire handles the handoff to WordPress. You keep full control of your HTML, CSS and frontend experience while the plugin handles submission processing, email delivery, success and error responses, and stored submissions.
 
-There is no form builder, embedded third-party widget or external form API to configure.
+There is no form builder or external form API to configure. The built-in spam protection requires no account; an optional Cloudflare Turnstile widget can be enabled when an additional browser-level check is wanted.
 
 **What Tango Form Wire handles**
 
@@ -26,6 +26,7 @@ There is no form builder, embedded third-party widget or external form API to co
 * Show inline loading, success and error responses, or redirect to a WordPress thank-you page.
 * Configure sensible sender and Reply-To behaviour.
 * Protect submissions with same-site checks, WordPress nonces, a honeypot, payload limits, rate limiting and duplicate protection.
+* Optionally require Cloudflare Turnstile verification on selected forms.
 * Extend behaviour through developer filters and actions.
 
 You build the form. Tango Form Wire handles the handoff.
@@ -38,7 +39,7 @@ You build the form. Tango Form Wire handles the handoff.
 4. Copy its Form Attribute into the opening tag of your existing HTML form.
 5. Configure the recipient, responses, templates, and email delivery method, then save.
 
-Add data-form-relay="FORM_ID" to an existing form on the same WordPress site. Form Relay's frontend script detects it, submits it using a WordPress nonce, and displays the configured success or safe public error message. No custom JavaScript, PHP, response element, API key, or external relay configuration is needed.
+Add data-form-relay="FORM_ID" to an existing form on the same WordPress site. Form Relay's frontend script detects it, submits it using a WordPress nonce, and displays the configured success or safe public error message. No custom JavaScript, PHP, response element, API key, or external relay configuration is needed unless optional Turnstile protection is enabled.
 
 Each Form has independent templates, success and error messages, behaviour, ignored fields, enabled status, and IP-based rate limits. Protection includes same-site checks, nonce validation, a honeypot, duplicate-submission detection, payload limits, sanitisation, and escaping.
 
@@ -55,6 +56,20 @@ Email delivery can use the WordPress default mail configuration, a GoDaddy/cPane
 While a frontend submission is being sent, Form Relay inserts an accessible inline loading indicator as the final content inside the form. It is removed when the configured success or error response is ready.
 
 Each valid frontend submission is stored in the current site's dedicated Form Relay submissions table after email delivery is attempted. Open Form Relay > Submissions to filter by Form or delivery status, inspect submitted fields, and delete individual or multiple records. Failed deliveries are stored so an enquiry is not lost when email delivery is unavailable.
+
+== Optional Cloudflare Turnstile ==
+
+The built-in spam protection remains active on every Form without requiring an account. For an additional check, create a Managed widget in Cloudflare Turnstile, open Form Relay > Cloudflare Turnstile, enable the integration, and enter its Site Key and Secret Key. Turnstile can then be enabled independently on each Form.
+
+Each Form offers a Turnstile Location setting. Before the submit button inserts the widget automatically. Manual placement uses an empty element with the `data-form-relay-captcha` attribute inside the form. The Secret Key can be defined as `TANGO_FORM_WIRE_TURNSTILE_SECRET` in `wp-config.php` instead of being stored in WordPress.
+
+When Turnstile is enabled, the visitor's browser connects to Cloudflare to load the widget and obtain a verification token. Tango Form Wire sends that token to Cloudflare's Siteverify API before accepting the submission. Tango Form Wire does not send submitted form field contents to Cloudflare.
+
+This service is provided by Cloudflare and is only used after an administrator explicitly configures and enables it:
+
+* [Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/)
+* [Cloudflare Privacy Policy](https://www.cloudflare.com/privacypolicy/)
+* [Cloudflare Website and Online Services Terms](https://www.cloudflare.com/website-terms/)
 
 == Developer hooks ==
 Filters: form_relay_submission_data, form_relay_email_subject, form_relay_email_html, form_relay_from_email, form_relay_smtp_host, form_relay_smtp_port, form_relay_error_code, form_relay_error_message, form_relay_duplicate_window, form_relay_max_fields, form_relay_max_field_name_length, form_relay_max_field_value_length, form_relay_max_payload_size.
@@ -89,6 +104,14 @@ Yes. Valid frontend submissions are stored in a dedicated per-site database tabl
 3. A form's configuration fields for recipient and behaviour.
 
 == Changelog ==
+
+= 1.10.0 =
+
+* Added optional Cloudflare Turnstile protection while preserving the existing no-account spam defences.
+* Added a dedicated Turnstile settings page with a plain-English overview and guided setup instructions.
+* Added per-Form activation with automatic placement before the submit button or precise manual placement.
+* Verify every single-use Turnstile token server-side before sending email or storing a submission.
+* Added friendly verification errors, automatic token resets and rate limiting for failed challenge attempts.
 
 = 1.9.1 =
 

@@ -13,9 +13,9 @@ document.addEventListener( 'click', function ( event ) {
 } );
 
 document.addEventListener( 'keydown', function ( event ) { if ( 'Escape' === event.key ) closeEmailPreview(); } );
-document.addEventListener( 'change', function ( event ) { if ( event.target.matches( '[name="form[response_type]"]' ) ) updateResponsePanels(); if ( event.target.matches( '[data-mail-method], [data-smtp-auth]' ) ) updateMailPanels(); if ( event.target.matches( '.form-relay-select-all' ) ) { document.querySelectorAll( '[name="submission_ids[]"], .form-relay-select-all' ).forEach( function ( checkbox ) { checkbox.checked = event.target.checked; } ); } } );
+document.addEventListener( 'change', function ( event ) { if ( event.target.matches( '[name="form[response_type]"]' ) ) updateResponsePanels(); if ( event.target.matches( '[data-mail-method], [data-smtp-auth]' ) ) updateMailPanels(); if ( event.target.matches( '[data-turnstile-global-toggle], [data-turnstile-form-toggle]' ) ) updateTurnstilePanels(); if ( event.target.matches( '.form-relay-select-all' ) ) { document.querySelectorAll( '[name="submission_ids[]"], .form-relay-select-all' ).forEach( function ( checkbox ) { checkbox.checked = event.target.checked; } ); } } );
 document.addEventListener( 'input', function ( event ) { if ( event.target.matches( '[name="form[sender_domain]"]' ) ) updateSenderDomain( event.target.value ); } );
-document.addEventListener( 'DOMContentLoaded', function () { updateResponsePanels(); updateMailPanels(); } );
+document.addEventListener( 'DOMContentLoaded', function () { updateResponsePanels(); updateMailPanels(); updateTurnstilePanels(); } );
 
 function updateSenderDomain( domain ) {
 	var suffix = document.querySelector( '.sender-email__domain' ); if ( suffix ) suffix.textContent = '@' + domain.replace( /^https?:\/\//i, '' ).replace( /^www\./i, '' ).split( '/' )[0];
@@ -30,6 +30,11 @@ function updateMailPanels() {
 	var method = document.querySelector( '[data-mail-method]' ); if ( ! method ) return;
 	document.querySelectorAll( '[data-mail-panel]' ).forEach( function ( panel ) { panel.hidden = panel.dataset.mailPanel !== method.value; } );
 	var auth = document.querySelector( '[data-smtp-auth]' ); var authFields = document.querySelector( '.smtp-auth-fields' ); if ( auth && authFields ) authFields.hidden = ! auth.checked;
+}
+
+function updateTurnstilePanels() {
+	var globalToggle = document.querySelector( '[data-turnstile-global-toggle]' ); var globalPanel = document.querySelector( '[data-turnstile-global-panel]' ); if ( globalToggle && globalPanel ) globalPanel.hidden = ! globalToggle.checked;
+	var formToggle = document.querySelector( '[data-turnstile-form-toggle]' ); var formPanel = document.querySelector( '[data-turnstile-form-panel]' ); if ( formToggle && formPanel ) formPanel.hidden = ! formToggle.checked;
 }
 
 function openEmailPreview() {

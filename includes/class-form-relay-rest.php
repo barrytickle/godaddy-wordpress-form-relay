@@ -4,15 +4,18 @@ defined( 'ABSPATH' ) || exit;
 class Form_Relay_REST {
 	private $service;
 	private $submissions;
+	private $turnstile;
 	private $form;
 	private $errors = array(
 		'invalid_form' => 'This form is no longer available.', 'form_disabled' => 'This form is currently unavailable.',
 		'invalid_nonce' => 'Your session has expired. Please refresh the page and try again.', 'validation_failed' => 'Please check the form and try again.',
 		'honeypot_triggered' => 'Please check the form and try again.', 'rate_limited' => 'Too many submissions have been made. Please try again shortly.',
 		'duplicate_submission' => 'This form appears to have already been submitted.', 'payload_too_large' => 'The submitted form contains too much information.',
+		'captcha_required' => 'Please complete the spam check and try again.', 'captcha_failed' => 'The spam check could not be verified. Please try again.',
+		'captcha_unavailable' => 'Spam protection is temporarily unavailable. Please try again shortly.',
 		'mail_failed' => "We couldn't send your message right now.", 'server_error' => 'Something went wrong. Please try again.',
 	);
-	public function __construct( $service, $submissions ) { $this->service = $service; $this->submissions = $submissions; }
+	public function __construct( $service, $submissions, $turnstile ) { $this->service = $service; $this->submissions = $submissions; $this->turnstile = $turnstile; }
 	public function hooks() { add_action( 'rest_api_init', array( $this, 'routes' ) ); }
 	public function routes() { register_rest_route( 'form-relay/v1', '/send', array( 'methods' => WP_REST_Server::CREATABLE, 'callback' => array( $this, 'send' ), 'permission_callback' => '__return_true' ) ); }
 	public function send( $request ) {
@@ -28,10 +31,13 @@ class Form_Relay_REST {
 		$ip = $this->client_ip(); $window = max( 1, (int) $this->form['rate_window'] ) * MINUTE_IN_SECONDS;
 		$bucket = 'form_relay_rate_' . hash( 'sha256', $form_id . '|' . $ip . '|' . floor( time() / $window ) ); $count = (int) get_transient( $bucket );
 		if ( $count >= max( 1, (int) $this->form['rate_limit'] ) ) { return $this->failure( 'rate_limited', 429 ); }
+		set_transient( $bucket, $count + 1, $window );
+		$captcha = $this->turnstile->verify( isset( $params['captcha_token'] ) ? $params['captcha_token'] : '', $this->form );
+		if ( is_wp_error( $captcha ) ) { $this->log( false, $captcha->get_error_message() ); return $this->failure( $captcha->get_error_code(), 'captcha_unavailable' === $captcha->get_error_code() ? 503 : 400 ); }
 		$fingerprint = 'form_relay_dupe_' . hash( 'sha256', $form_id . '|' . $ip . '|' . wp_json_encode( isset( $params['fields'] ) ? $params['fields'] : array() ) );
 		if ( get_transient( $fingerprint ) ) { return $this->failure( 'duplicate_submission', 409 ); }
 		$data = $this->service->normalise( $params ); if ( is_wp_error( $data ) ) { return $this->failure( 'validation_failed', 400 ); }
-		set_transient( $bucket, $count + 1, $window ); set_transient( $fingerprint, 1, (int) apply_filters( 'form_relay_duplicate_window', 30, $form_id ) );
+		set_transient( $fingerprint, 1, (int) apply_filters( 'form_relay_duplicate_window', 30, $form_id ) );
 		$sent = $this->service->email( $data, true, $this->form ); $error = $sent ? '' : $this->service->last_error();
 		$this->submissions->create( $data, $this->form, $sent, $error );
 		$this->log( $sent, $sent ? '' : 'PHPMailer SMTP failed while processing Form ID ' . $form_id . ': ' . $error );

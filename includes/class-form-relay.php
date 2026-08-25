@@ -3,6 +3,7 @@ defined( 'ABSPATH' ) || exit;
 
 require_once FORM_RELAY_DIR . 'includes/class-form-relay-renderer.php';
 require_once FORM_RELAY_DIR . 'includes/class-form-relay-submissions.php';
+require_once FORM_RELAY_DIR . 'includes/class-form-relay-turnstile.php';
 require_once FORM_RELAY_DIR . 'includes/class-form-relay-service.php';
 require_once FORM_RELAY_DIR . 'includes/class-form-relay-rest.php';
 require_once FORM_RELAY_DIR . 'admin/class-form-relay-admin.php';
@@ -20,8 +21,12 @@ final class Form_Relay {
 		return array(
 			'logging' => 0,
 			'mail' => self::mail_defaults(),
+			'spam' => self::spam_defaults(),
 			'forms' => array(),
 		);
+	}
+	public static function spam_defaults() {
+		return array( 'provider' => 'builtin', 'turnstile_site_key' => '', 'turnstile_secret' => '' );
 	}
 	public static function mail_defaults() {
 		return array(
@@ -38,7 +43,7 @@ final class Form_Relay {
 			'success_message' => 'Thanks, your message has been sent.', 'error_message' => 'Sorry, something went wrong. {{error_message}}', 'reset_after_success' => 1,
 			'response_type' => 'message', 'thank_you_page' => 0, 'success_classes' => '', 'error_classes' => '',
 			'disable_while_submitting' => 1, 'scroll_to_response' => 1,
-			'ignored_fields' => "g-recaptcha-response\ncsrf_token\nnonce\nhoneypot\n_recaptcha", 'rate_limit' => 30, 'rate_window' => 10,
+			'ignored_fields' => "cf-turnstile-response\ng-recaptcha-response\ncsrf_token\nnonce\nhoneypot\n_recaptcha", 'rate_limit' => 30, 'rate_window' => 10, 'turnstile' => 0, 'turnstile_location' => 'before_submit',
 			'email_template' => Form_Relay_Renderer::default_email_template(), 'row_template' => Form_Relay_Renderer::default_row_template(),
 		);
 	}
@@ -53,6 +58,7 @@ final class Form_Relay {
 		}
 		$settings = wp_parse_args( $stored, self::defaults() );
 		$settings['mail'] = wp_parse_args( $settings['mail'], self::mail_defaults() );
+		$settings['spam'] = wp_parse_args( $settings['spam'], self::spam_defaults() );
 		if ( empty( $settings['forms'] ) ) {
 			$form = self::new_form( 'Sample Form' );
 			foreach ( array_keys( $form ) as $key ) { if ( isset( $settings[ $key ] ) ) { $form[ $key ] = $settings[ $key ]; } }
@@ -72,15 +78,15 @@ final class Form_Relay {
 		Form_Relay_Submissions::maybe_install();
 		$service = new Form_Relay_Service();
 		$submissions = new Form_Relay_Submissions();
-		( new Form_Relay_REST( $service, $submissions ) )->hooks();
+		( new Form_Relay_REST( $service, $submissions, new Form_Relay_Turnstile() ) )->hooks();
 		add_action( 'wp_enqueue_scripts', array( $this, 'frontend_assets' ) );
 		if ( is_admin() ) { ( new Form_Relay_Admin( $service, $submissions ) )->hooks(); }
 	}
 	public function frontend_assets() {
 		wp_enqueue_script( 'form-relay', plugins_url( 'assets/form-relay.js', FORM_RELAY_FILE ), array(), FORM_RELAY_VERSION, true );
 		wp_enqueue_style( 'form-relay', plugins_url( 'assets/form-relay.css', FORM_RELAY_FILE ), array(), FORM_RELAY_VERSION );
-		$behaviour = array(); foreach ( self::settings()['forms'] as $form ) { $behaviour[ $form['id'] ] = array( 'disable' => ! empty( $form['disable_while_submitting'] ), 'scroll' => ! empty( $form['scroll_to_response'] ), 'responseType' => $form['response_type'], 'thankYouUrl' => $form['thank_you_page'] ? get_permalink( $form['thank_you_page'] ) : '', 'successClasses' => self::class_names( $form['success_classes'] ), 'errorClasses' => self::class_names( $form['error_classes'] ) ); }
-		wp_localize_script( 'form-relay', 'FormRelayConfig', array( 'endpoint' => rest_url( 'form-relay/v1/send' ), 'nonce' => wp_create_nonce( 'wp_rest' ), 'siteName' => get_bloginfo( 'name' ), 'forms' => $behaviour ) );
+		$settings = self::settings(); $behaviour = array(); foreach ( $settings['forms'] as $form ) { $behaviour[ $form['id'] ] = array( 'disable' => ! empty( $form['disable_while_submitting'] ), 'scroll' => ! empty( $form['scroll_to_response'] ), 'responseType' => $form['response_type'], 'thankYouUrl' => $form['thank_you_page'] ? get_permalink( $form['thank_you_page'] ) : '', 'successClasses' => self::class_names( $form['success_classes'] ), 'errorClasses' => self::class_names( $form['error_classes'] ), 'turnstile' => Form_Relay_Turnstile::required( $form, $settings['spam'] ), 'turnstileLocation' => 'manual' === $form['turnstile_location'] ? 'manual' : 'before_submit' ); }
+		wp_localize_script( 'form-relay', 'FormRelayConfig', array( 'endpoint' => rest_url( 'form-relay/v1/send' ), 'nonce' => wp_create_nonce( 'wp_rest' ), 'siteName' => get_bloginfo( 'name' ), 'forms' => $behaviour, 'turnstile' => array( 'siteKey' => 'turnstile' === $settings['spam']['provider'] ? $settings['spam']['turnstile_site_key'] : '', 'scriptUrl' => Form_Relay_Turnstile::SCRIPT_URL ) ) );
 	}
 	private static function class_names( $classes ) { return array_values( array_filter( array_map( 'sanitize_html_class', preg_split( '/\s+/', (string) $classes ) ) ) ); }
 }

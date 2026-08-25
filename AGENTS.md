@@ -35,7 +35,8 @@ The intended public positioning is: **bring your own HTML; let WordPress handle 
 - `includes/class-form-relay-service.php`: submission normalisation, mail headers and transport selection.
 - `includes/class-form-relay-renderer.php`: placeholder expansion and safe HTML email rendering.
 - `includes/class-form-relay-submissions.php`: per-site submission table installation, persistence, queries and deletion.
-- `admin/class-form-relay-admin.php`: Forms list, post-style editor, settings persistence, test email and preview markup.
+- `includes/class-form-relay-turnstile.php`: optional Cloudflare Turnstile configuration checks and server-side token verification.
+- `admin/class-form-relay-admin.php`: Forms list, post-style editor, Cloudflare Turnstile settings page, settings persistence, test email and preview markup.
 - `admin/js/admin.js`: admin interactions and client-side email preview.
 - `assets/form-relay.js`: frontend interception, payload creation, loader and success/error behaviour.
 - `readme.txt`: WordPress.org-format documentation.
@@ -88,6 +89,7 @@ The public endpoint is intentionally available to logged-out visitors. Its prote
 - honeypot field
 - IP-based rate limiting
 - duplicate-submission fingerprints
+- optional per-form Cloudflare Turnstile verification, disabled by default
 - maximum payload, field count, name length, value length and nesting depth
 - recursive sanitisation
 - context-appropriate escaping during email rendering
@@ -104,6 +106,10 @@ Continue to follow WordPress's rules:
 - escape late according to the output context;
 - use `wp_kses()`/`wp_kses_post()` only where limited HTML is intended;
 - never expose internal mail errors to frontend visitors.
+
+Turnstile is a deliberately optional external service. Do not contact Cloudflare unless an administrator has selected the provider and enabled it for a Form. Never expose the Secret Key to frontend JavaScript; prefer `TANGO_FORM_WIRE_TURNSTILE_SECRET` in `wp-config.php`. Verification must remain server-side, and the Turnstile token must never appear in stored submissions or email fields.
+
+Global Turnstile credentials live under Form Relay > Cloudflare Turnstile. Individual Form editors contain only an enable checkbox and a location selector. `before_submit` creates the widget immediately before the first submit control; `manual` requires an existing `[data-form-relay-captcha]` element inside the Form and must not silently fall back to automatic placement.
 
 ## WordPress.org readiness
 

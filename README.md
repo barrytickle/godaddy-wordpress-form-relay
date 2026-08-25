@@ -1,6 +1,6 @@
 # Tango Form Wire
 
-Form Relay connects an ordinary HTML form to WordPress and delivers each submission by email. It is intended for forms hosted on the same site and does not require an external form service or API key.
+Form Relay connects an ordinary HTML form to WordPress and delivers each submission by email. It is intended for forms hosted on the same site and does not require an external form service or API key by default. Optional Cloudflare Turnstile protection can be enabled for sites that want an additional browser-level spam check.
 
 Valid frontend submissions are also saved in **Form Relay > Submissions**. The WordPress-style list shows the Form, submitted name and email, delivery status, and submission time. Each record opens into a detail view, and administrators can filter or delete saved submissions. Successful and failed mail attempts are both retained so an email outage does not discard an enquiry.
 
@@ -108,8 +108,42 @@ Forms can display an inline thank-you message or redirect to a selected WordPres
 
 Submissions are stored in a dedicated database table for the current WordPress site and are visible only to administrators with the `manage_options` capability. Records remain until they are deleted from **Form Relay > Submissions**. Because submitted fields may contain personal data, site owners should include them in their privacy and retention policy.
 
+## Spam protection
+
+Every form uses the built-in same-origin and nonce checks, honeypot, IP rate limiting, duplicate detection and payload limits. These protections require no account or external service.
+
+Cloudflare Turnstile can be enabled as an optional additional layer:
+
+1. Create a Managed Turnstile widget in the [Cloudflare dashboard](https://dash.cloudflare.com/?to=/:account/turnstile).
+2. Open **Form Relay > Cloudflare Turnstile**, enable the integration and paste the Site Key and Secret Key.
+3. Edit a Form and enable Turnstile in its **Cloudflare Turnstile** block.
+4. Choose **Before the submit button** or **Manual placement**, then save.
+
+For better secret handling, define the key in `wp-config.php` instead of storing it in the WordPress database:
+
+```php
+define( 'TANGO_FORM_WIRE_TURNSTILE_SECRET', 'your-secret-key' );
+```
+
+The default location inserts the widget immediately before the first submit button. For Manual placement, add an empty marker anywhere inside the form:
+
+```html
+<div data-form-relay-captcha></div>
+```
+
+Turnstile is loaded only on pages containing a Form configured to require it. The browser connects to Cloudflare to obtain a verification token, and WordPress sends that token to Cloudflare's Siteverify API. Form field contents are not sent to Cloudflare by Tango Form Wire. See the [Turnstile documentation](https://developers.cloudflare.com/turnstile/), [Cloudflare Privacy Policy](https://www.cloudflare.com/privacypolicy/) and [Cloudflare Website and Online Services Terms](https://www.cloudflare.com/website-terms/).
+
 ## Developer hooks
 
 Filters: `form_relay_submission_data`, `form_relay_email_subject`, `form_relay_email_html`, `form_relay_from_email`, `form_relay_smtp_host`, `form_relay_smtp_port`, `form_relay_error_code`, `form_relay_error_message`, `form_relay_duplicate_window`, `form_relay_max_fields`, `form_relay_max_field_name_length`, `form_relay_max_field_value_length`, `form_relay_max_payload_size`.
 
 Actions: `form_relay_before_send`, `form_relay_after_send`.
+
+## Changelog
+
+### 1.10.0
+
+- Added optional Cloudflare Turnstile protection while keeping the built-in no-account spam defences active.
+- Added a dedicated settings page with guided setup and secure global credential storage.
+- Added per-form enablement with automatic or manual widget placement.
+- Added mandatory server-side verification, friendly errors, token resets and rate limiting for failed challenges.
