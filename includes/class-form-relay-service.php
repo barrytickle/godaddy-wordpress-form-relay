@@ -58,6 +58,38 @@ class Form_Relay_Service {
 		do_action( 'form_relay_after_send', $sent, $data );
 		return $sent;
 	}
+
+	/** Send the optional visitor acknowledgement with the same transport as the main message. */
+	public function confirmation( $data, $form ) {
+		if ( empty( $form['confirmation_enabled'] ) ) { return null; }
+		$key = isset( $form['confirmation_email_field'] ) ? trim( $form['confirmation_email_field'] ) : 'email';
+		$value = isset( $data['fields'][ $key ] ) ? $data['fields'][ $key ] : '';
+		$recipient = is_string( $value ) ? sanitize_email( trim( $value ) ) : '';
+		if ( ! is_email( $recipient ) ) {
+			$this->last_error = 'Confirmation recipient is missing or invalid.';
+			return false;
+		}
+		$data['form_name'] = $form['name'];
+		$vars = array( 'form_name' => $form['name'], 'site_name' => get_bloginfo( 'name' ) );
+		foreach ( $data['fields'] as $field => $field_value ) {
+			if ( is_scalar( $field_value ) ) { $vars[ $field ] = (string) $field_value; }
+		}
+		$subject = isset( $form['confirmation_subject'] ) ? $form['confirmation_subject'] : '';
+		$template = isset( $form['confirmation_template'] ) ? $form['confirmation_template'] : '';
+		foreach ( $vars as $key => $value ) {
+			$subject = str_replace( '{{' . $key . '}}', sanitize_text_field( $value ), $subject );
+			$template = str_replace( '{{' . $key . '}}', esc_html( $value ), $template );
+		}
+		$subject = sanitize_text_field( preg_replace( '/{{[a-zA-Z0-9_-]+}}/', '', $subject ) );
+		$form_for_render = $form;
+		$form_for_render['email_template'] = $template;
+		$html = $this->renderer->render( $data, $form_for_render );
+		$from = $this->sender_email( $form );
+		$from_name = str_replace( array( '{{site_name}}', '{{form_name}}' ), array( get_bloginfo( 'name' ), $form['name'] ), $form['from_name'] );
+		$headers = array( 'Content-Type: text/html; charset=UTF-8' );
+		if ( $from ) { $headers[] = 'From: ' . sanitize_text_field( $from_name ) . ' <' . $from . '>'; $headers[] = 'Reply-To: ' . $from; }
+		return $this->send( $recipient, $subject, $html, $headers, $form );
+	}
 	public function last_error() { return $this->last_error; }
 	private function send( $recipient, $subject, $html, $headers, $form ) {
 		$this->last_error = '';
