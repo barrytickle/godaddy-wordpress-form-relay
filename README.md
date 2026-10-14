@@ -96,6 +96,10 @@ If possible, temporarily send one test to a mailbox hosted on the same cPanel ac
 
 Avoid submitting dozens of identical tests in quick succession. That can resemble spam and makes the delivery logs harder to read.
 
+## Visitor confirmation emails
+
+Each form can optionally send an acknowledgement to the visitor after the main notification email has been accepted. Enable **Visitor Confirmation Email** in the form editor, specify the exact submitted email field name (usually `email`), and customise the subject and HTML template. The same WordPress/local/custom SMTP configuration is used for both messages. Confirmation templates support `{{site_name}}`, `{{form_name}}` and scalar submitted fields such as `{{name}}`. Confirmation errors do not turn an accepted enquiry into a failed submission; administrators can inspect diagnostic logging when enabled.
+
 ## Templates and responses
 
 Email templates support placeholders including `{{form_name}}`, `{{site_name}}`, `{{page_title}}`, `{{page_url}}`, `{{submitted_at}}` and `{{fields}}`. Field row templates support `{{field_key}}`, `{{field_label}}` and `{{field_value}}`.
@@ -140,6 +144,12 @@ Filters: `form_relay_submission_data`, `form_relay_email_subject`, `form_relay_e
 Actions: `form_relay_before_send`, `form_relay_after_send`.
 
 ## Changelog
+
+### 1.11.0
+
+- Added opt-in per-form visitor confirmation messages with editable subject, recipient field and HTML body.
+- Confirmation messages reuse the existing mail transport. Their failure does not trigger a visitor retry.
+
 
 ### 1.10.0
 

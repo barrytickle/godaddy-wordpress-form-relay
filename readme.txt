@@ -3,7 +3,7 @@ Contributors: barrytickle, tangodevelopment
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.10.0
+Stable tag: 1.11.0
 License: GPLv2 or later
 
 Connect your existing HTML forms to WordPress email delivery, saved submissions and SMTP without replacing your markup.
@@ -104,6 +104,12 @@ Yes. Valid frontend submissions are stored in a dedicated per-site database tabl
 3. A form's configuration fields for recipient and behaviour.
 
 == Changelog ==
+
+= 1.11.0 =
+* Added optional per-form visitor confirmation email with editable subject, template, and recipient field.
+* Confirmations use the same email transport, sender and SMTP settings as the main enquiry.
+* Confirmation failures do not invalidate successfully accepted enquiries.
+
 
 = 1.10.0 =
 

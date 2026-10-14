@@ -42,6 +42,12 @@ class Form_Relay_REST {
 		$this->submissions->create( $data, $this->form, $sent, $error );
 		$this->log( $sent, $sent ? '' : 'PHPMailer SMTP failed while processing Form ID ' . $form_id . ': ' . $error );
 		if ( ! $sent ) { return $this->failure( 'mail_failed', 500 ); }
+		$confirmation = $this->service->confirmation( $data, $this->form );
+		if ( false === $confirmation ) {
+			// Do not fail the accepted enquiry: a retry would duplicate the submission.
+			$this->log( false, 'Visitor confirmation failed for Form ID ' . $form_id . ': ' . $this->service->last_error() );
+		}
+		do_action( 'form_relay_confirmation_sent', $confirmation, $data, $this->form );
 		$message = $this->message( $this->form['success_message'], array( 'form_name' => $this->form['name'] ) );
 		return new WP_REST_Response( array( 'success' => true, 'message' => $message, 'reset' => ! empty( $this->form['reset_after_success'] ) ), 200 );
 	}
