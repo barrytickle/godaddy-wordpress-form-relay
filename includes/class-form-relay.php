@@ -45,6 +45,9 @@ final class Form_Relay {
 			'disable_while_submitting' => 1, 'scroll_to_response' => 1,
 			'ignored_fields' => "cf-turnstile-response\ng-recaptcha-response\ncsrf_token\nnonce\nhoneypot\n_recaptcha", 'rate_limit' => 30, 'rate_window' => 10, 'turnstile' => 0, 'turnstile_location' => 'before_submit',
 			'email_template' => Form_Relay_Renderer::default_email_template(), 'row_template' => Form_Relay_Renderer::default_row_template(),
+			'confirmation_enabled' => 0, 'confirmation_email_field' => 'email',
+			'confirmation_subject' => 'We received your message | {{site_name}}',
+			'confirmation_template' => '<p>Hi {{name}},</p><p>Thank you for getting in touch with {{site_name}}. We have received your message and will respond as soon as possible.</p><p>Kind regards,<br>{{site_name}}</p>',
 		);
 	}
 
